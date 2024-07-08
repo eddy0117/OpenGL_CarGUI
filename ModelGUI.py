@@ -130,7 +130,7 @@ def deg2rad(deg):
 
 if __name__ == "__main__":
 
-    model = get_model_info(["models/SVR.obj", "models/MasCasual3.obj"], ["textures/car_jeep_ren.jpg", "textures/ManCasual3.png"])
+    model = get_model_info(["models/SVR.obj", "models/MasCasual3.obj", "models/cube.obj"], ["textures/car_jeep_ren.jpg", "textures/ManCasual3.png", "textures/cube.png"])
     
     t1 = None
     idx = 0
@@ -141,23 +141,36 @@ if __name__ == "__main__":
     with open('result2ue5.json', 'r') as f:
         data = json.load(f)
 
+    with open('coord.json', 'r') as f:
+        coord = json.load(f)
+
     while not glfw.window_should_close(window):
+
+        glfw.poll_events()
+
         if idx > len(list(data.keys())) - 1:
             break
         cur_frame_data = data[list(data.keys())[idx]]
-
-        glfw.poll_events()
+        cur_coord_data = coord[list(coord.keys())[idx]]
 
         if not t1:
             t1 = time.time()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        if time.time() - t1 > 0.1:
+        if time.time() - t1 > 0.01:
             r = pyrr.Matrix44.from_y_rotation(math.pi)
             idx += 1
             t1 = time.time()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
             draw_model(model[0], pyrr.Matrix44.from_y_rotation(deg2rad(180)), pyrr.matrix44.create_from_translation(pyrr.Vector3([0, -5, 0])))
+
+            for dot in cur_coord_data:
+                x = dot[1] / 682 * 100 - 50
+                y = dot[0] / 682 * 100 - 50
+                draw_model(model[2], pyrr.Matrix44.from_y_rotation(-deg2rad(90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
+
+
             for obj_idx in list(cur_frame_data.keys()):
                 obj = cur_frame_data[obj_idx]
                 if obj['class'] == 'car':
