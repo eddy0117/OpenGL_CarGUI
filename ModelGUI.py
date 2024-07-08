@@ -130,7 +130,7 @@ def deg2rad(deg):
 
 if __name__ == "__main__":
 
-    model = get_model_info(["models/SVR.obj", "models/MasCasual3.obj", "models/cube.obj"], ["textures/car_jeep_ren.jpg", "textures/ManCasual3.png", "textures/cube.png"])
+    model = get_model_info(["models/SVR.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj"], ["textures/car_jeep_ren.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png"])
     
     t1 = None
     idx = 0
@@ -165,12 +165,16 @@ if __name__ == "__main__":
 
             draw_model(model[0], pyrr.Matrix44.from_y_rotation(deg2rad(180)), pyrr.matrix44.create_from_translation(pyrr.Vector3([0, -5, 0])))
 
+            # draw floor dots
             for dot in cur_coord_data:
                 x = dot[1] / 682 * 70 - 35
                 y = dot[0] / 682 * 70 - 35
-                if dot[2] == 0:
+                if dot[2] == 0: # side
+                    draw_model(model[4], pyrr.Matrix44.from_y_rotation(-deg2rad(90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
+                if dot[2] == 1: # crossroad
                     draw_model(model[2], pyrr.Matrix44.from_y_rotation(-deg2rad(90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
-
+                if dot[2] == 2: # roadline
+                    draw_model(model[3], pyrr.Matrix44.from_y_rotation(-deg2rad(90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
 
             for obj_idx in list(cur_frame_data.keys()):
                 obj = cur_frame_data[obj_idx]
