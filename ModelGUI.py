@@ -157,7 +157,7 @@ if __name__ == "__main__":
             t1 = time.time()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        if time.time() - t1 > 0.01:
+        if time.time() - t1 > 0.1:
             r = pyrr.Matrix44.from_y_rotation(math.pi)
             idx += 1
             t1 = time.time()
@@ -166,9 +166,10 @@ if __name__ == "__main__":
             draw_model(model[0], pyrr.Matrix44.from_y_rotation(deg2rad(180)), pyrr.matrix44.create_from_translation(pyrr.Vector3([0, -5, 0])))
 
             for dot in cur_coord_data:
-                x = dot[1] / 682 * 100 - 50
-                y = dot[0] / 682 * 100 - 50
-                draw_model(model[2], pyrr.Matrix44.from_y_rotation(-deg2rad(90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
+                x = dot[1] / 682 * 70 - 35
+                y = dot[0] / 682 * 70 - 35
+                if dot[2] == 0:
+                    draw_model(model[2], pyrr.Matrix44.from_y_rotation(-deg2rad(90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
 
 
             for obj_idx in list(cur_frame_data.keys()):
