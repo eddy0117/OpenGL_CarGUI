@@ -1,12 +1,14 @@
+import os
 import glfw
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 import pyrr
-from TextureLoader import load_texture
-from ObjLoader import ObjLoader
+from tools.TextureLoader import load_texture
+from tools.ObjLoader import ObjLoader
 import math
 import time
 import json
+
 
 # glfw callback functions
 def window_resize(window, width, height, proj_loc):
@@ -138,10 +140,10 @@ if __name__ == "__main__":
     
 
     
-    with open('result2ue5.json', 'r') as f:
+    with open(os.path.join('JSONfiles','result2ue5.json'), 'r') as f:
         data = json.load(f)
 
-    with open('coord.json', 'r') as f:
+    with open(os.path.join('JSONfiles','coord.json'), 'r') as f:
         coord = json.load(f)
 
     while not glfw.window_should_close(window):
