@@ -130,7 +130,7 @@ def deg2rad(deg):
 
 if __name__ == "__main__":
 
-    model = get_model_info(["models/SVR.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/moped.obj"], ["textures/car_jeep_ren.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/moped.png"])
+    model = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/moped.obj"], ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/moped.png"])
     
     t1 = None
     idx = 0
