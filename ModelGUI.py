@@ -130,7 +130,7 @@ def deg2rad(deg):
 
 if __name__ == "__main__":
 
-    model = get_model_info(["models/SVR.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj"], ["textures/car_jeep_ren.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png"])
+    model = get_model_info(["models/SVR.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/moped.obj"], ["textures/car_jeep_ren.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/moped.png"])
     
     t1 = None
     idx = 0
@@ -190,6 +190,12 @@ if __name__ == "__main__":
                     x = c_x / 682 * 100 - 50
                     y = c_y / 682 * 100 - 50
                     draw_model(model[1], pyrr.Matrix44.from_y_rotation(-deg2rad(obj['distance_ang'] + 90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
+                elif obj['class'] == 'motorcycle':
+                    c_x = obj['x']
+                    c_y = obj['y']
+                    x = c_x / 682 * 100 - 50
+                    y = c_y / 682 * 100 - 50
+                    draw_model(model[5], pyrr.Matrix44.from_y_rotation(-deg2rad(obj['distance_ang'] + 90)), pyrr.matrix44.create_from_translation(pyrr.Vector3([x, -5, y])))
 
             glfw.swap_buffers(window)
         
