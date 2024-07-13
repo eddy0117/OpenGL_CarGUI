@@ -1,4 +1,3 @@
-import glfw
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 import pyrr
@@ -6,11 +5,7 @@ from tools.TextureLoader import load_texture
 from tools.ObjLoader import ObjLoader
 import math
 
-
-
-
-
-def get_model_info(model_paths, texture_paths=None):
+def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
     vertex_src = """
     # version 330
     layout(location = 0) in vec3 a_position;
@@ -76,8 +71,8 @@ def get_model_info(model_paths, texture_paths=None):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-        projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280 / 720, 0.1, 100)
-        view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 25]), pyrr.Vector3([0, -1, 0]), pyrr.Vector3([0, 1, 0]))
+        # projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280 / 720, 0.1, 100)
+        
 
         model_loc = glGetUniformLocation(shader, "model")
         proj_loc = glGetUniformLocation(shader, "projection")
