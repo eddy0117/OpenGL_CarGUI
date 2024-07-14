@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1322</width>
-    <height>823</height>
+    <height>846</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,8 +83,8 @@
         <widget class="QLabel" name="img_front">
          <property name="maximumSize">
           <size>
-           <width>450</width>
-           <height>253</height>
+           <width>470</width>
+           <height>264</height>
           </size>
          </property>
          <property name="styleSheet">
@@ -105,8 +105,8 @@
         <widget class="QLabel" name="img_back">
          <property name="maximumSize">
           <size>
-           <width>450</width>
-           <height>253</height>
+           <width>470</width>
+           <height>264</height>
           </size>
          </property>
          <property name="text">
@@ -121,15 +121,15 @@
    <widget class="QLCDNumber" name="speedometer">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>680</y>
-      <width>191</width>
-      <height>91</height>
+      <x>440</x>
+      <y>670</y>
+      <width>281</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">QLCDNumber {
- color: #68dbe3; 
+ color: #1fed45; 
 background-color: #000000; border-radius: 16px;
 };
 
@@ -142,34 +142,34 @@ background-color: #000000; border-radius: 16px;
      <bool>false</bool>
     </property>
     <property name="digitCount">
-     <number>4</number>
+     <number>5</number>
     </property>
     <property name="segmentStyle">
      <enum>QLCDNumber::Flat</enum>
     </property>
     <property name="value" stdset="0">
-     <double>0.000000000000000</double>
+     <double>888.799999999999955</double>
     </property>
    </widget>
    <widget class="QLabel" name="l_km">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>740</x>
       <y>690</y>
-      <width>171</width>
-      <height>71</height>
+      <width>201</width>
+      <height>91</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <family>Agency FB</family>
-      <pointsize>48</pointsize>
+      <pointsize>60</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true"> color: #68dbe3;</string>
+     <string notr="true"> color: #1fed45;</string>
     </property>
     <property name="text">
      <string>km/h</string>

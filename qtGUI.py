@@ -27,7 +27,7 @@ class Car_MainWindow(Ui_MainWindow):
             self.img_arr[cam_path] = []
             for img_path in img_paths:
                 img = cv2.imread(os.path.join('dummy_imgs', cam_path, img_path))
-                img = cv2.resize(img, (450, 253))
+                img = cv2.resize(img, (470, 264))
                 self.img_arr[cam_path].append(img)
 
     def update_img(self):
