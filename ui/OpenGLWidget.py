@@ -20,11 +20,13 @@ class OpenGLWidget(QOpenGLWidget):
 
         self.obj_dict = {
                     'car' : 0,
+                    'bus' : 0,
                     'pedestrian' : 1,
                     'motorcycle' : 5,
                     'sign_60' : 6,
                     'sign_ped' : 7,
-                    'cone' : 8
+                    'cone' : 8,
+                    'truck' : 9,
                     }
 
         self.t1 = None
@@ -35,27 +37,24 @@ class OpenGLWidget(QOpenGLWidget):
         road_dots_path = 'coord.json'
 
 
-        with open(os.path.join('JSONfiles', obj_path), 'r') as f:
+        with open(os.path.join('json', obj_path), 'r') as f:
             self.data = json.load(f)
 
-        with open(os.path.join('JSONfiles', road_dots_path), 'r') as f:
+        with open(os.path.join('json', road_dots_path), 'r') as f:
             self.coord = json.load(f)
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update)
-        self.timer.start(1000 // 5)
 
     def initializeGL(self):
         # glClearColor(0.0, 0.0, 0.0, 1.0)
 
         
-        glClearColor(0.1, 0.1, 0.1, 1)
+        glClearColor(0.0, 0.0, 0.0, 1)
 
         self.view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 20]), pyrr.Vector3([0, -1, 0]), pyrr.Vector3([0, 1, 0]))
         self.projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
 
-        self.model, _ = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj"], 
-                                        ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/gray_2.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png"],
+        self.model, _ = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj", "models/truck.obj"], 
+                                        ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/scooter.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png", "textures/truck.png"],
                                         self.view, self.projection)
 
     def resizeGL(self, w, h):

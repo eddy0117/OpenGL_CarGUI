@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1493</width>
-    <height>712</height>
+    <width>1322</width>
+    <height>823</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #242424;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="horizontalLayoutWidget">
@@ -19,19 +22,13 @@
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>1281</width>
-      <height>631</height>
+      <width>1291</width>
+      <height>640</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QOpenGLWidget" name="openGLWidget">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QWidget" name="widget" native="true">
        <property name="minimumSize">
         <size>
          <width>800</width>
@@ -44,12 +41,61 @@
          <height>600</height>
         </size>
        </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: #000000; border-radius: 16px;</string>
+       </property>
+       <widget class="QOpenGLWidget" name="openGLWidget">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>780</width>
+          <height>580</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>780</width>
+          <height>580</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>750</width>
+          <height>550</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+       </widget>
       </widget>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QLabel" name="img_front">
+         <property name="maximumSize">
+          <size>
+           <width>450</width>
+           <height>253</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -57,6 +103,12 @@
        </item>
        <item>
         <widget class="QLabel" name="img_back">
+         <property name="maximumSize">
+          <size>
+           <width>450</width>
+           <height>253</height>
+          </size>
+         </property>
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -66,13 +118,70 @@
      </item>
     </layout>
    </widget>
+   <widget class="QLCDNumber" name="speedometer">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>680</y>
+      <width>191</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLCDNumber {
+ color: #68dbe3; 
+background-color: #000000; border-radius: 16px;
+};
+
+</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="smallDecimalPoint">
+     <bool>false</bool>
+    </property>
+    <property name="digitCount">
+     <number>4</number>
+    </property>
+    <property name="segmentStyle">
+     <enum>QLCDNumber::Flat</enum>
+    </property>
+    <property name="value" stdset="0">
+     <double>0.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="l_km">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>690</y>
+      <width>171</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Agency FB</family>
+      <pointsize>48</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"> color: #68dbe3;</string>
+    </property>
+    <property name="text">
+     <string>km/h</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1493</width>
+     <width>1322</width>
      <height>21</height>
     </rect>
    </property>

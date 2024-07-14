@@ -18,7 +18,7 @@ def main():
         raise Exception("glfw can not be initialized!")
 
     # Creating the window
-    window = glfw.create_window(1280, 720, "My OpenGL window", None, None)
+    window = glfw.create_window(800, 600, "My OpenGL window", None, None)
 
     # Check if window was created
     if not window:
@@ -34,9 +34,10 @@ def main():
     # Make the context current
     glfw.make_context_current(window)
 
-    view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 20]), pyrr.Vector3([0, -1, 0]), pyrr.Vector3([0, 1, 0]))
-    projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280 / 720, 0.1, 100)
-
+    # view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 2, 18]), pyrr.Vector3([0, 0, 10]), pyrr.Vector3([0, 1, 0]))
+    # projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 200)
+    view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 17]), pyrr.Vector3([0, -1, 0]), pyrr.Vector3([0, 1, 0]))
+    projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
     model, proj_loc = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj"], 
                                      ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/gray_2.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png"],
                                      view, projection)
@@ -64,10 +65,10 @@ def main():
     road_dots_path = 'coord.json'
 
     
-    with open(os.path.join('JSONfiles', obj_path), 'r') as f:
+    with open(os.path.join('json', obj_path), 'r') as f:
         data = json.load(f)
 
-    with open(os.path.join('JSONfiles', road_dots_path), 'r') as f:
+    with open(os.path.join('json', road_dots_path), 'r') as f:
         coord = json.load(f)
 
     while not glfw.window_should_close(window):
@@ -83,7 +84,7 @@ def main():
             t1 = time.time()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        if time.time() - t1 > 0.2:
+        if time.time() - t1 > 0.1:
           
             idx += 1
             t1 = time.time()

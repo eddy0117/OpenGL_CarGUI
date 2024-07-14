@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/GUI.ui'
+# Form implementation generated from reading ui file 'ui/src/GUI.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -14,37 +14,74 @@ from ui.OpenGLWidget import OpenGLWidget
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1493, 712)
+        MainWindow.resize(1322, 823)
+        MainWindow.setStyleSheet("background-color: #242424;")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 30, 1281, 631))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 30, 1291, 640))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.openGLWidget = OpenGLWidget(self.horizontalLayoutWidget)
+        self.widget = QtWidgets.QWidget(self.horizontalLayoutWidget)
+        self.widget.setMinimumSize(QtCore.QSize(800, 600))
+        self.widget.setMaximumSize(QtCore.QSize(800, 600))
+        self.widget.setStyleSheet("background-color: #000000; border-radius: 16px;")
+        self.widget.setObjectName("widget")
+        self.openGLWidget = OpenGLWidget(self.widget)
+        self.openGLWidget.setGeometry(QtCore.QRect(10, 10, 780, 580))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.openGLWidget.sizePolicy().hasHeightForWidth())
         self.openGLWidget.setSizePolicy(sizePolicy)
-        self.openGLWidget.setMinimumSize(QtCore.QSize(800, 600))
-        self.openGLWidget.setMaximumSize(QtCore.QSize(800, 600))
+        self.openGLWidget.setMinimumSize(QtCore.QSize(780, 580))
+        self.openGLWidget.setMaximumSize(QtCore.QSize(750, 550))
+        self.openGLWidget.setStyleSheet("")
         self.openGLWidget.setObjectName("openGLWidget")
-        self.horizontalLayout.addWidget(self.openGLWidget)
+        self.horizontalLayout.addWidget(self.widget)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
         self.img_front = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.img_front.setMaximumSize(QtCore.QSize(450, 253))
+        self.img_front.setStyleSheet("")
+        self.img_front.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.img_front.setFrameShadow(QtWidgets.QFrame.Plain)
         self.img_front.setObjectName("img_front")
         self.verticalLayout.addWidget(self.img_front)
         self.img_back = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.img_back.setMaximumSize(QtCore.QSize(450, 253))
         self.img_back.setObjectName("img_back")
         self.verticalLayout.addWidget(self.img_back)
         self.horizontalLayout.addLayout(self.verticalLayout)
+        self.speedometer = QtWidgets.QLCDNumber(self.centralwidget)
+        self.speedometer.setGeometry(QtCore.QRect(40, 680, 191, 91))
+        self.speedometer.setStyleSheet("QLCDNumber {\n"
+" color: #68dbe3; \n"
+"background-color: #000000; border-radius: 16px;\n"
+"};\n"
+"\n"
+"")
+        self.speedometer.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.speedometer.setSmallDecimalPoint(False)
+        self.speedometer.setDigitCount(4)
+        self.speedometer.setSegmentStyle(QtWidgets.QLCDNumber.Flat)
+        self.speedometer.setProperty("value", 0.0)
+        self.speedometer.setObjectName("speedometer")
+        self.l_km = QtWidgets.QLabel(self.centralwidget)
+        self.l_km.setGeometry(QtCore.QRect(240, 690, 171, 71))
+        font = QtGui.QFont()
+        font.setFamily("Agency FB")
+        font.setPointSize(48)
+        font.setBold(True)
+        font.setWeight(75)
+        self.l_km.setFont(font)
+        self.l_km.setStyleSheet(" color: #68dbe3;")
+        self.l_km.setObjectName("l_km")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1493, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1322, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -59,6 +96,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.img_front.setText(_translate("MainWindow", "TextLabel"))
         self.img_back.setText(_translate("MainWindow", "TextLabel"))
+        self.l_km.setText(_translate("MainWindow", "km/h"))
 
 
 if __name__ == "__main__":
