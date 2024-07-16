@@ -39,7 +39,7 @@ def main():
     view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 17]), pyrr.Vector3([0, -1, 0]), pyrr.Vector3([0, 1, 0]))
     projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
     model, proj_loc = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj"], 
-                                     ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/gray_2.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png"],
+                                     ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/scooter.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png"],
                                      view, projection)
     
     dot_dict = {
