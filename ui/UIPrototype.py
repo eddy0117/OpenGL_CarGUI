@@ -11,10 +11,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ui.OpenGLWidget import OpenGLWidget
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1322, 846)
+        MainWindow.resize(1322, 949)
         MainWindow.setStyleSheet("background-color: #242424;")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -79,6 +80,26 @@ class Ui_MainWindow(object):
         self.l_km.setFont(font)
         self.l_km.setStyleSheet(" color: #1fed45;")
         self.l_km.setObjectName("l_km")
+        self.speedometer_2 = QtWidgets.QLCDNumber(self.centralwidget)
+        self.speedometer_2.setGeometry(QtCore.QRect(440, 800, 281, 131))
+        self.speedometer_2.setStyleSheet("QLCDNumber {\n"
+" color: #1fed45; \n"
+"background-color: #000000; border-radius: 16px;\n"
+"};\n"
+"\n"
+"")
+        self.speedometer_2.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.speedometer_2.setSmallDecimalPoint(False)
+        self.speedometer_2.setDigitCount(5)
+        self.speedometer_2.setSegmentStyle(QtWidgets.QLCDNumber.Flat)
+        self.speedometer_2.setProperty("value", 888.8)
+        self.speedometer_2.setObjectName("speedometer_2")
+        self.steer_left_img = QtWidgets.QLabel(self.centralwidget)
+        self.steer_left_img.setGeometry(QtCore.QRect(180, 700, 100, 100))
+        self.steer_left_img.setObjectName("steer_left_img")
+        self.steer_right_img = QtWidgets.QLabel(self.centralwidget)
+        self.steer_right_img.setGeometry(QtCore.QRect(1050, 700, 100, 100))
+        self.steer_right_img.setObjectName("steer_right_img")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1322, 21))
@@ -97,6 +118,8 @@ class Ui_MainWindow(object):
         self.img_front.setText(_translate("MainWindow", "TextLabel"))
         self.img_back.setText(_translate("MainWindow", "TextLabel"))
         self.l_km.setText(_translate("MainWindow", "km/h"))
+        self.steer_left_img.setText(_translate("MainWindow", "TextLabel"))
+        self.steer_right_img.setText(_translate("MainWindow", "TextLabel"))
 
 
 if __name__ == "__main__":

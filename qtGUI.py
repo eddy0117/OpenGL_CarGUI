@@ -8,7 +8,7 @@ from PyQt5.QtGui import QImage, QPixmap
 import sys
 import os
 import cv2
-
+import json
 
 class Car_MainWindow(Ui_MainWindow):
     def __init__(self):
@@ -18,9 +18,15 @@ class Car_MainWindow(Ui_MainWindow):
         self.speed_arr = []
         self.img_idx = 0
         self.cam_path_arr = ['CAM_FRONT', 'CAM_BACK']
+        self.display_tl = False
+        self.tl_dire = 'left'
+        self.isLightOn = False
 
         with open('json/speeds.txt', 'r') as f:
             self.speed_arr = f.readlines()
+        
+        with open('json/vehicle_monitor.json', 'r') as f:
+            self.vehicle_monitor_arr = json.load(f)
 
         for cam_path in self.cam_path_arr:
             img_paths = sorted(os.listdir(os.path.join('dummy_imgs', cam_path)), key=lambda x: int(x.split('.')[0].split('_')[-1]))
@@ -38,7 +44,37 @@ class Car_MainWindow(Ui_MainWindow):
             self.img_front.setPixmap(self.convert_cv_qt(self.img_arr['CAM_FRONT'][self.img_idx]))
             self.img_back.setPixmap(self.convert_cv_qt(self.img_arr['CAM_BACK'][self.img_idx]))
             self.speedometer.display(round(float(self.speed_arr[self.img_idx].strip()), 1))
+            steering = round(float(self.vehicle_monitor_arr[self.img_idx]['steering']),2)
+            self.speedometer_2.display(steering)
+            if steering > 60:
+                self.display_tl = True
+                self.tl_dire = 'left'
+            elif steering < -60:
+                self.display_tl = True
+                self.tl_dire = 'right'
+            else:
+                self.display_tl = False
+    
 
+
+
+    def turn_light(self):
+        if self.display_tl:
+            if self.isLightOn:
+                self.isLightOn = False
+                if self.tl_dire == 'left':
+                    self.steer_left_img.setPixmap(QPixmap('imgs/green_arrow_left.png'))
+                elif self.tl_dire == 'right':
+                    self.steer_right_img.setPixmap(QPixmap('imgs/green_arrow_right.png'))
+            else:
+                if self.tl_dire == 'left':
+                    self.steer_left_img.setPixmap(QPixmap('imgs/green_arrow_left_dark.png'))
+                elif self.tl_dire == 'right':
+                    self.steer_right_img.setPixmap(QPixmap('imgs/green_arrow_right_dark.png'))
+                self.isLightOn = True
+        else:
+            self.steer_left_img.setPixmap(QPixmap('imgs/green_arrow_left_dark.png'))
+            self.steer_right_img.setPixmap(QPixmap('imgs/green_arrow_right_dark.png'))
 
     def convert_cv_qt(self, cv_img):
         
@@ -57,12 +93,21 @@ class Car_MainWindow(Ui_MainWindow):
         
         self.speedometer.display(round(float(self.speed_arr[self.img_idx].strip()), 1))
 
+       
+        self.steer_left_img.setScaledContents(True)
+        self.steer_right_img.setScaledContents(True)
+        self.steer_left_img.setPixmap(QPixmap('imgs/green_arrow_left_dark.png'))
+        self.steer_right_img.setPixmap(QPixmap('imgs/green_arrow_right_dark.png'))
 
     def setupTimer(self):
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.openGLWidget.update)
-        self.timer.timeout.connect(self.update_img)
-        self.timer.start(1000 // 8)
+        self.timer_frame = QTimer()
+        self.timer_frame.timeout.connect(self.openGLWidget.update)
+        self.timer_frame.timeout.connect(self.update_img)
+        self.timer_frame.start(1000 // 3)
+
+        self.timer_turnlight = QTimer()
+        self.timer_turnlight.timeout.connect(self.turn_light)
+        self.timer_turnlight.start(500)
         
     
 

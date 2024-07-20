@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1322</width>
-    <height>846</height>
+    <height>949</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -173,6 +173,65 @@ background-color: #000000; border-radius: 16px;
     </property>
     <property name="text">
      <string>km/h</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="speedometer_2">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>800</y>
+      <width>281</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLCDNumber {
+ color: #1fed45; 
+background-color: #000000; border-radius: 16px;
+};
+
+</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="smallDecimalPoint">
+     <bool>false</bool>
+    </property>
+    <property name="digitCount">
+     <number>5</number>
+    </property>
+    <property name="segmentStyle">
+     <enum>QLCDNumber::Flat</enum>
+    </property>
+    <property name="value" stdset="0">
+     <double>888.799999999999955</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="steer_left_img">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>700</y>
+      <width>100</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="steer_right_img">
+    <property name="geometry">
+     <rect>
+      <x>1050</x>
+      <y>700</y>
+      <width>100</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>
