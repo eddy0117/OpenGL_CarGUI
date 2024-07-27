@@ -5,6 +5,8 @@ import time
 import base64
 import cv2
 
+MAX_CHUNK_SIZE = 10000
+
 def send_udp_message():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 65432))
@@ -100,8 +102,11 @@ def send_udp_message():
             print('send length : ',len(data_send))
             # client_socket.sendto(data_send, server_address)
 
-            client_socket.sendall(data_send)
-            time.sleep(0.1)
+            # client_socket.sendall(data_send)
+            for i in range(0, len(data_send), MAX_CHUNK_SIZE):
+                client_socket.sendall(data_send[i:i+MAX_CHUNK_SIZE])
+            client_socket.sendall('end'.encode('utf-8'))
+            time.sleep(0.033)
             idx += 1
 
     finally:

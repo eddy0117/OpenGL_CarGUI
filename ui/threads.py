@@ -28,9 +28,25 @@ class DataRecievedThread(QObject):
         
 
     def run(self):
-        conn, addr = self.server_socket.accept()
+        conn, _ = self.server_socket.accept()
+        whole_data = b''
         while True:
-            # try:
+            
+            data = conn.recv(5000)
+            # print(data.__len__())
+            
+            if not data:
+                self.server_socket.close()
+                break
+
+            if data[-3:] == b'end': # end of a package
+                whole_data += data[:-3]
+                data = json.loads(whole_data.decode('utf-8'))
+                self.data_recieved_signal.emit(data)
+                whole_data = b''
+            else:
+                whole_data += data
+       # try:
 
             #     data, addr = self.server_socket.recvfrom(100000)
             #     data = json.loads(data.decode('utf-8'))
@@ -38,17 +54,6 @@ class DataRecievedThread(QObject):
 
             # except BlockingIOError:
             #     pass
-            
-            data = conn.recv(1000000)
-
-            if not data:
-                self.server_socket.close()
-                break
-
-            data = json.loads(data.decode('utf-8'))
-            self.data_recieved_signal.emit(data)
-            
-       
             
 
 
