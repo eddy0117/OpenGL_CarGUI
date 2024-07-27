@@ -4,3 +4,4 @@ PyOpenGL==3.1.7
 PyOpenGL-accelerate==3.1.7
 pyrr==0.10.3
 pillow==10.4.0
+pyqt5

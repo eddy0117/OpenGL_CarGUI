@@ -39,14 +39,16 @@ class OpenGLWidget(QOpenGLWidget):
         obj_path = 'result2ue5_add.json'
         road_dots_path = 'coord.json'
 
+
+        self.cur_frame_data = {}
         self.speed_limit_60 = False
 
 
-        with open(os.path.join('json', obj_path), 'r') as f:
-            self.data = json.load(f)
+        # with open(os.path.join('json', obj_path), 'r') as f:
+        #     self.data = json.load(f)
 
-        with open(os.path.join('json', road_dots_path), 'r') as f:
-            self.coord = json.load(f)
+        # with open(os.path.join('json', road_dots_path), 'r') as f:
+        #     self.coord = json.load(f)
 
 
     def initializeGL(self):
@@ -65,41 +67,69 @@ class OpenGLWidget(QOpenGLWidget):
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
 
-    def paintGL(self):
+    # def paintGL(self):
 
-        if self.idx > len(list(self.data.keys())) - 1:
-            return
+    #     if self.idx > len(list(self.data.keys())) - 1:
+    #         return
         
-        cur_frame_data = self.data[list(self.data.keys())[self.idx]]
-        cur_coord_data = self.coord[list(self.coord.keys())[self.idx]]
+    #     cur_frame_data = self.data[list(self.data.keys())[self.idx]]
+    #     cur_coord_data = self.coord[list(self.coord.keys())[self.idx]]
           
-        self.idx += 1
+    #     self.idx += 1
 
-        draw_model(self.model[0], 180, [0, -5, 0])
+    #     draw_model(self.model[0], 180, [0, -5, 0])
 
-        # draw floor dots
-        for dot in cur_coord_data:
-            x = dot[1] / 682 * 70 - 35
-            y = dot[0] / 682 * 70 - 35
+    #     # draw floor dots
+    #     for dot in cur_coord_data:
+    #         x = dot[1] / 682 * 70 - 35
+    #         y = dot[0] / 682 * 70 - 35
         
-            draw_model(self.model[self.dot_dict[str(dot[2])]], 90, [x, -5, y])
+    #         draw_model(self.model[self.dot_dict[str(dot[2])]], 90, [x, -5, y])
 
 
-        # draw scene objects
-        for obj_idx in list(cur_frame_data.keys()):
-            obj = cur_frame_data[obj_idx]
-            if obj['class'] not in self.obj_dict.keys():
-                continue
-            c_x = obj['x']
-            c_y = obj['y']
-            x = c_x / 682 * 100 - 50
-            y = c_y / 682 * 100 - 50
+    #     # draw scene objects
+    #     for obj_idx in list(cur_frame_data.keys()):
+    #         obj = cur_frame_data[obj_idx]
+    #         if obj['class'] not in self.obj_dict.keys():
+    #             continue
+    #         c_x = obj['x']
+    #         c_y = obj['y']
+    #         x = c_x / 682 * 100 - 50
+    #         y = c_y / 682 * 100 - 50
             
-            # TODO : optimize speed limit sign determine
+    #         # TODO : optimize speed limit sign determine
 
-            if obj['class'] == 'sign_60':
-                self.speed_limit_60 = True
+    #         if obj['class'] == 'sign_60':
+    #             self.speed_limit_60 = True
 
-            draw_model(self.model[self.obj_dict[obj['class']]], obj['distance_ang'] + 90, [x, -5, y])
+    #         draw_model(self.model[self.obj_dict[obj['class']]], obj['distance_ang'] + 90, [x, -5, y])
 
-        # self.update()
+    def paintGL(self):
+    
+        if self.cur_frame_data:
+
+            draw_model(self.model[0], 180, [0, -5, 0])
+
+            # draw floor dots
+            for dot in self.cur_frame_data['dot']:
+                x = dot['x'] / 682 * 70 - 35
+                y = dot['y'] / 682 * 70 - 35
+            
+                draw_model(self.model[self.dot_dict[str(dot['cls'])]], 90, [x, -5, y])
+
+
+            # draw scene objects
+            for obj in self.cur_frame_data['obj']:
+                if obj['cls'] not in self.obj_dict.keys():
+                    continue
+                c_x = obj['x']
+                c_y = obj['y']
+                x = c_x / 682 * 100 - 50
+                y = c_y / 682 * 100 - 50
+                
+                # TODO : optimize speed limit sign determine
+
+                if obj['cls'] == 'sign_60':
+                    self.speed_limit_60 = True
+
+                draw_model(self.model[self.obj_dict[obj['cls']]], obj['ang'] + 90, [x, -5, y])   
