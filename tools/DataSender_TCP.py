@@ -5,12 +5,13 @@ import time
 import base64
 import cv2
 
-MAX_CHUNK_SIZE = 10000
+MAX_CHUNK_SIZE = 5000
 
 def send_udp_message():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 65432))
-    client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1000000)
+    # client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 50000)
+    # client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 5000)
     # server_address = ('localhost', 65432)
  
     try:
@@ -99,14 +100,31 @@ def send_udp_message():
             # send data_send to server
 
             data_send = json.dumps(data_send).encode('utf-8')
-            print('send length : ',len(data_send))
+            
+            # UDP
             # client_socket.sendto(data_send, server_address)
 
+            # TCP
             # client_socket.sendall(data_send)
+
+            data_send += ('\0').encode('utf-8')
+            print('send length : ',len(data_send))
             for i in range(0, len(data_send), MAX_CHUNK_SIZE):
+                # print('segment length : ',len(data_send[i:i+MAX_CHUNK_SIZE]))
                 client_socket.sendall(data_send[i:i+MAX_CHUNK_SIZE])
-            client_socket.sendall('end'.encode('utf-8'))
-            time.sleep(0.033)
+
+
+            # if len(data_send) < MAX_CHUNK_SIZE * 4:
+            #     data_send_padd = data_send + b'\0' * (MAX_CHUNK_SIZE * 4 - len(data_send))
+            # print('send length : ',len(data_send), ', padd length : ', len(data_send_padd))
+            # for i in range(0, len(data_send_padd), MAX_CHUNK_SIZE):
+            #     # print('segment length : ',len(data_send[i:i+MAX_CHUNK_SIZE]))
+            #     client_socket.sendall(data_send_padd[i:i+MAX_CHUNK_SIZE])
+              
+
+
+            # client_socket.sendall('end'.encode('utf-8'))
+            time.sleep(0.01)
             idx += 1
 
     finally:
