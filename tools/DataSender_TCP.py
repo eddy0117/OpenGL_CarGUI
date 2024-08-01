@@ -45,11 +45,11 @@ def send_udp_message():
                 img = cv2.resize(img, (470, 264))
                 img_arr[cam_path].append(img)
 
-        # bev_img_paths = sorted(os.listdir(os.path.join('dummy_imgs', 'gt_t')), key=lambda x: int(x.split('.')[0]))
-        # img_arr['bev_img'] = []
-        # for img_path in bev_img_paths:
-        #     img = cv2.imread(os.path.join('dummy_imgs', 'gt_t', img_path))
-        #     img_arr['bev_img'].append(img)
+        bev_img_paths = sorted(os.listdir(os.path.join('dummy_imgs', 'gt_t')), key=lambda x: int(x.split('.')[0]))
+        img_arr['bev_img'] = []
+        for img_path in bev_img_paths:
+            img = cv2.imread(os.path.join('dummy_imgs', 'gt_t', img_path))
+            img_arr['bev_img'].append(img)
 
         idx = 0
         while True:
@@ -80,15 +80,23 @@ def send_udp_message():
       
                 data_send['img'][cam_path] = cur_img
 
+            # send bev image
+            
+            cur_img = img_arr['bev_img'][idx]
+            # base64 encode image
+            _, cur_img = cv2.imencode('.jpg', cur_img)
+            cur_img = base64.b64encode(cur_img).decode('utf-8')  # decode bytes to string
+    
+            data_send['img']['BEV'] = cur_img
 
             # send dots       
-            data_dot = []
+            # data_dot = []
 
-            for dot in cur_coord_data:
-                data_dot.append({'x' : dot[1], 
-                                 'y' : dot[0],
-                                 'cls' : dot[2]})
-            data_send['dot'] = data_dot
+            # for dot in cur_coord_data:
+            #     data_dot.append({'x' : dot[1], 
+            #                      'y' : dot[0],
+            #                      'cls' : dot[2]})
+            # data_send['dot'] = data_dot
 
             # send objects
             data_obj = []
@@ -131,7 +139,7 @@ def send_udp_message():
 
             # client_socket.sendall('end'.encode('utf-8'))
             # delay = random.uniform(0.03, 0.08)
-            delay = 0.33
+            delay = 0.2
             time.sleep(delay)
             idx += 1
 

@@ -5,7 +5,8 @@ from OpenGL.GL import *
 import pyrr
 import json
 import os
-from tools.DrawFunctions import get_model_info, draw_model
+import time
+from tools.DrawFunctions import *
 
 class OpenGLWidget(QOpenGLWidget):
     def __init__(self, parent=None, obj_path=None, road_dots_path=None):
@@ -32,7 +33,6 @@ class OpenGLWidget(QOpenGLWidget):
                     'front_right_arrow' : 12,
                     }
 
-        self.t1 = None
         self.idx = 0
         
         # TODO : move this to main
@@ -73,21 +73,25 @@ class OpenGLWidget(QOpenGLWidget):
     def set_view(self, view):
         self.view = pyrr.matrix44.create_look_at(pyrr.Vector3((view[0])), pyrr.Vector3(view[1]), pyrr.Vector3(view[2]))
 
-    def paintGL(self):
-        
+    def paintGL(self):    
         if self.cur_frame_data:
+            
+
             glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
             draw_model(self.model[0], 180, [0, -5, 0])
             self.idx += 1
             # draw floor dots
+            t0 = time.time()
             for dot in self.cur_frame_data['dot']:
-                x = dot['x'] / 682 * 70 - 35
-                y = dot['y'] / 682 * 70 - 35
+                x = dot['x'] / 200 * 70 - 35
+                y = dot['y'] / 200 * 70 - 35
             
                 draw_model(self.model[self.dot_dict[str(dot['cls'])]], 90, [x, -5, y])
-
+                
+            print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
             # draw scene objects
+            t0 = time.time()
             for obj in self.cur_frame_data['obj']:
                 if obj['cls'] not in self.obj_dict.keys():
                     continue
@@ -102,3 +106,5 @@ class OpenGLWidget(QOpenGLWidget):
                     self.speed_limit_60 = True
 
                 draw_model(self.model[self.obj_dict[obj['cls']]], obj['ang'], [x, -5, y])   
+            
+            print('draw obj time : ', round((time.time() - t0) * 1000, 4), 'ms')

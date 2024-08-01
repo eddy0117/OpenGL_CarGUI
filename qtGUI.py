@@ -14,6 +14,32 @@ import os
 import cv2
 import json
 import base64
+import time
+from numba import jit
+
+@jit
+def process_bev_data(img):
+    
+    
+    dot_data = []
+
+    for i in range(0, img.shape[0], 3):
+        for j in range(0, img.shape[1], 3):
+            # if list(img[i, j]) == [0, 0, 0]:
+            #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':0})
+            # elif list(img[i, j]) == [255, 0, 0]:
+            #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':1})
+            # elif list(img[i, j]) == [0, 0, 255]:
+            #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':2})
+            pixel = img[i, j]
+            if pixel[0] == 0 and pixel[1] == 0 and pixel[2] == 0:
+                dot_data.append({'x': j, 'y': i, 'cls': 0})
+            elif pixel[0] == 255 and pixel[1] == 0 and pixel[2] == 0:
+                dot_data.append({'x': j, 'y': i, 'cls': 1})
+            elif pixel[0] == 0 and pixel[1] == 0 and pixel[2] == 255:
+                dot_data.append({'x': j, 'y': i, 'cls': 2})
+
+    return dot_data
 
 class Car_MainWindow(Ui_MainWindow):
     def __init__(self):
@@ -75,19 +101,77 @@ class Car_MainWindow(Ui_MainWindow):
             rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
         return QPixmap.fromImage(convert_to_Qt_format)
     
+    # @jit(nopython=True)
+    def process_bev_data(self):
+        img = cv2.cvtColor(self.img_bev_data, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (200, 200))
+        img = np.rot90(img, 1)
+        
+        img[(img.shape[0] // 2 - 8):(img.shape[0] // 2 + 8), (img.shape[1] // 2 - 4):(img.shape[1] // 2 + 3)] = 255
+        img = cv2.threshold(img, 105, 255, cv2.THRESH_BINARY)[1]
+        
+ 
+        for i in range(0, img.shape[0], 3):
+            for j in range(0, img.shape[1], 3):
+                # if list(img[i, j]) == [0, 0, 0]:
+                #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':0})
+                # elif list(img[i, j]) == [255, 0, 0]:
+                #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':1})
+                # elif list(img[i, j]) == [0, 0, 255]:
+                #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':2})
+                pixel = img[i, j]
+                if pixel[0] == 0 and pixel[1] == 0 and pixel[2] == 0:
+                    self.cur_frame_data['dot'].append({'x': j, 'y': i, 'cls': 0})
+                elif pixel[0] == 255 and pixel[1] == 0 and pixel[2] == 0:
+                    self.cur_frame_data['dot'].append({'x': j, 'y': i, 'cls': 1})
+                elif pixel[0] == 0 and pixel[1] == 0 and pixel[2] == 255:
+                    self.cur_frame_data['dot'].append({'x': j, 'y': i, 'cls': 2})
+
     def recv_data(self, data_rec):
         self.cur_frame_data = data_rec
         self.flag_frame_changed = True
-        self.idx_data += 1
+        # t0 = time.time()
+        for cam, img_data in data_rec['img'].items():
+
+            img_data = base64.b64decode(img_data) # -> bytes
+            img = np.frombuffer(img_data, np.uint8) # -> numpy array, shape = (N,)
+            img = cv2.imdecode(img, cv2.IMREAD_COLOR) # -> numpy array, shape = (H, W, C)
+            
+            if cam == 'CAM_FRONT':
+                self.img_front_data = self.convert_cv_qt(img)
+            elif cam == 'CAM_BACK':
+                self.img_back_data = self.convert_cv_qt(img)
+            elif cam == 'BEV':
+                self.img_bev_data = img
+       
+        self.cur_frame_data['dot'] = []
+
+        t0 = time.time()
+
+        img = cv2.cvtColor(self.img_bev_data, cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (200, 200))
+        img = np.rot90(img, 1)
+        
+        img[(img.shape[0] // 2 - 8):(img.shape[0] // 2 + 8), (img.shape[1] // 2 - 4):(img.shape[1] // 2 + 3)] = 255
+        img = cv2.threshold(img, 105, 255, cv2.THRESH_BINARY)[1]
+
+        self.cur_frame_data['dot'] = process_bev_data(img)
+        
+       
+
+        print('==== bev img time ==== : ', round((time.time() - t0) * 1000, 4), 'ms')
+        
+
+    # def process_img_data(self)
+
 
     def isIntersection(self):
         dots_data = self.cur_frame_data['dot']
-        flag_intersection = False
-        line_1 = [250, 270]
-        line_2 = [400, 420]
+        line_1 = [245 // 3.41, 275 // 3.41]
+        line_2 = [395 // 3.41, 452 // 3.41]
         in_dot_sum = 0
         out_dot_sum = 0
-        thr = 5
+        thr = 2
         
         for dot in dots_data:
             if dot['cls'] == 1:
@@ -98,7 +182,6 @@ class Car_MainWindow(Ui_MainWindow):
 
         if self.flag_frame_changed:
             if in_dot_sum > thr:
-                print('into Intersection!')
                 if not self.queue_inter:
                     self.queue_inter.append('in')
                 else:
@@ -106,16 +189,12 @@ class Car_MainWindow(Ui_MainWindow):
                         self.queue_inter.append('in')
                         
             if out_dot_sum > thr:
-                print('out Intersection!')
                 if not self.queue_inter:
                     self.queue_inter.append('out')
                 else: 
                     if self.queue_inter[-1] != 'out':
                         self.queue_inter.append('out')
   
-            # if in_dot_sum < thr and out_dot_sum < thr:
-            #     print('***')
-            # print(dot_sum)
             self.flag_frame_changed = False
 
     def cam_rise(self):
@@ -172,13 +251,16 @@ class Car_MainWindow(Ui_MainWindow):
         
     
     def updateUI(self):
-
+        
         # Update UI after received first frame data
+        # t0 = time.time()
         if self.cur_frame_data:       
              
             self.openGLWidget.cur_frame_data = self.cur_frame_data
             self.openGLWidget.update()
+           
             self.update_img(self.cur_frame_data)
+            
             self.isIntersection()
 
             if self.queue_inter:
@@ -191,28 +273,23 @@ class Car_MainWindow(Ui_MainWindow):
                     if not self.flag_cam_lock:
                         self.queue_inter.pop(0)
 
-            # if self.inters == 'in' or self.flag_cam_lock:
-            #     if not self.flag_cam_lock:
-            #         self.flag_cam_rise = True
-            #         self.cam_rise()
-            # if self.inters == 'out' or self.flag_cam_lock:
-            #     if not self.flag_cam_lock:
-            #         self.flag_cam_down = True
-            #         self.cam_down()
+        # print('==== update UI time ==== : ', round((time.time() - t0) * 1000, 4), 'ms') 
             
     # Updating frame
     def update_img(self, data_rec):
+        
+        # for cam, img_data in data_rec['img'].items():
 
-        for cam, img_data in data_rec['img'].items():
-
-            img_data = base64.b64decode(img_data) # -> bytes
-            img = np.frombuffer(img_data, np.uint8) # -> numpy array, shape = (N,)
-            img = cv2.imdecode(img, cv2.IMREAD_COLOR) # -> numpy array, shape = (H, W, C)
-            if cam == 'CAM_FRONT':
-                self.img_front.setPixmap(self.convert_cv_qt(img))
-            elif cam == 'CAM_BACK':
-                self.img_back.setPixmap(self.convert_cv_qt(img))
-
+        #     img_data = base64.b64decode(img_data) # -> bytes
+        #     img = np.frombuffer(img_data, np.uint8) # -> numpy array, shape = (N,)
+        #     img = cv2.imdecode(img, cv2.IMREAD_COLOR) # -> numpy array, shape = (H, W, C)
+            
+        #     if cam == 'CAM_FRONT':
+        #         self.img_front.setPixmap(self.convert_cv_qt(img))
+        #     elif cam == 'CAM_BACK':
+        #         self.img_back.setPixmap(self.convert_cv_qt(img))
+        self.img_front.setPixmap(self.img_front_data)
+        self.img_back.setPixmap(self.img_back_data)
         self.speedometer.display(round(float(data_rec['speed']), 1))
         steering = round(float(data_rec['steering']),2)
         if steering > 60:
@@ -228,6 +305,7 @@ class Car_MainWindow(Ui_MainWindow):
             self.img_speed_limit.setPixmap(QPixmap('imgs/spd_limit_60.png'))
 
 if __name__ == '__main__':
+    process_bev_data(np.zeros((200, 200, 3), np.uint8))
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     app = QApplication(sys.argv)
     window = QMainWindow()

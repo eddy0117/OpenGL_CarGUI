@@ -89,9 +89,13 @@ def deg2rad(deg):
     return deg * math.pi / 180
 
 def draw_model(model_info, deg, model_pos):
+    
+    # model yaw rotation 
     rot_y = pyrr.Matrix44.from_y_rotation(-deg2rad(deg))
+
+    # model position
     pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
-    # load_texture(model_info['texture_path'], model_info['textures'][0])
+
     glBindVertexArray(model_info['VAO'])
     glBindTexture(GL_TEXTURE_2D, model_info['textures'])
     # glBindVertexArray(model_info['VBO'])
