@@ -4,6 +4,7 @@ import json
 import time
 import base64
 import cv2
+import random
 
 MAX_CHUNK_SIZE = 5000
 
@@ -44,6 +45,11 @@ def send_udp_message():
                 img = cv2.resize(img, (470, 264))
                 img_arr[cam_path].append(img)
 
+        # bev_img_paths = sorted(os.listdir(os.path.join('dummy_imgs', 'gt_t')), key=lambda x: int(x.split('.')[0]))
+        # img_arr['bev_img'] = []
+        # for img_path in bev_img_paths:
+        #     img = cv2.imread(os.path.join('dummy_imgs', 'gt_t', img_path))
+        #     img_arr['bev_img'].append(img)
 
         idx = 0
         while True:
@@ -91,7 +97,7 @@ def send_udp_message():
                 data_obj.append({'x' : obj['x'], 
                                  'y' : obj['y'], 
                                  'cls' : obj['class'], 
-                                 'ang' : obj['distance_ang']})
+                                 'ang' : obj['distance_ang'] + 90})
            
 
             
@@ -124,7 +130,9 @@ def send_udp_message():
 
 
             # client_socket.sendall('end'.encode('utf-8'))
-            time.sleep(0.01)
+            # delay = random.uniform(0.03, 0.08)
+            delay = 0.33
+            time.sleep(delay)
             idx += 1
 
     finally:

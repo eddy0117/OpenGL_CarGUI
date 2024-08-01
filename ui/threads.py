@@ -11,27 +11,23 @@ class DataRecievedThread(QObject):
 
     def __init__(self):
         super(DataRecievedThread, self).__init__()
-        # # 创建一个UDP套接字
-        # self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # # 绑定套接字到本地地址和端口
-        # self.server_socket.bind(('localhost', 65432))
-        # # 设置套接字为非阻塞模式
-        # self.server_socket.setblocking(False)
 
-        # 创建一个TCP套接字
+        # Create a TCP socket
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # 绑定套接字到本地地址和端口
+       
+        # Bind the socket to the address and port
         self.server_socket.bind(('localhost', 65432))
         
+        # Setup the socket to listen for incoming connections
         self.server_socket.listen(1)
         
+        # Set the maximum size of the message that can be received one time
         self.MAX_CHUNK_SIZE = 5000
         
 
     def run(self):
         conn, _ = self.server_socket.accept()
         whole_data = b''
-        chunk_idx = 0
         data_cat = b''
         while True:
             
@@ -42,20 +38,16 @@ class DataRecievedThread(QObject):
             if not data:
                 self.server_socket.close()
                 break
-            # data = json.loads(data.strip(b'\0').decode('utf-8'))
-            # self.data_recieved_signal.emit(data)
+
             data_split = data.split(b'\0')
-            if len(data_split) > 1: # end of a package
-                data_cat = data_split[1] # preserve the rest of the data (a part of next frame first chunk)
+            if len(data_split) > 1: # End of a package
+                data_cat = data_split[1] # Preserve the rest of the data (a part of next frame first chunk)
                 whole_data += data_split[0]
-                # print(data.index(b'\0'), data.__len__(), data[data.index(b'\0')-5:data.index(b'\0')+5], data_cat[:5])
-                # print(data[-30:], 'data len : ' , data.decode('utf-8').__len__(), 'whole data len : ' , whole_data.decode('utf-8').__len__())
                 data = json.loads(whole_data.strip(b'\0').decode('utf-8'))
                 self.data_recieved_signal.emit(data)
                 whole_data = b''
                 
             else:
-                # print(data.__len__(), data_split[0].__len__())
                 data_cat = b''
                 whole_data += data_split[0]
 

@@ -83,7 +83,7 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, view)
         result.append({'model_loc' : model_loc, 'indices': model_indices, 'VAO' : VAO[idx], 'textures' : textures[idx]})
 
-    return result, proj_loc
+    return result, proj_loc, view_loc
 
 def deg2rad(deg):
     return deg * math.pi / 180

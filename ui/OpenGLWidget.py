@@ -57,59 +57,28 @@ class OpenGLWidget(QOpenGLWidget):
         
         glClearColor(0.0, 0.0, 0.0, 1)
 
-        self.view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 20]), pyrr.Vector3([0, -1, 0]), pyrr.Vector3([0, 1, 0]))
+        self.view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 20]), 
+                                                 pyrr.Vector3([0, -1, 0]), 
+                                                 pyrr.Vector3([0, 1, 0]))
+        
         self.projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
 
-        self.model, _ = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj", "models/truck.obj", "models/front_arrow.obj", "models/front_left_arrow.obj", "models/front_right_arrow.obj"], 
+        self.model, _, self.view_loc = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj", "models/truck.obj", "models/front_arrow.obj", "models/front_left_arrow.obj", "models/front_right_arrow.obj"], 
                                         ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/scooter.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png", "textures/truck.png", "textures/white.png", "textures/white.png", "textures/white.png"],
                                         self.view, self.projection)
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
-
-    # def paintGL(self):
-
-    #     if self.idx > len(list(self.data.keys())) - 1:
-    #         return
         
-    #     cur_frame_data = self.data[list(self.data.keys())[self.idx]]
-    #     cur_coord_data = self.coord[list(self.coord.keys())[self.idx]]
-          
-    #     self.idx += 1
-
-    #     draw_model(self.model[0], 180, [0, -5, 0])
-
-    #     # draw floor dots
-    #     for dot in cur_coord_data:
-    #         x = dot[1] / 682 * 70 - 35
-    #         y = dot[0] / 682 * 70 - 35
-        
-    #         draw_model(self.model[self.dot_dict[str(dot[2])]], 90, [x, -5, y])
-
-
-    #     # draw scene objects
-    #     for obj_idx in list(cur_frame_data.keys()):
-    #         obj = cur_frame_data[obj_idx]
-    #         if obj['class'] not in self.obj_dict.keys():
-    #             continue
-    #         c_x = obj['x']
-    #         c_y = obj['y']
-    #         x = c_x / 682 * 100 - 50
-    #         y = c_y / 682 * 100 - 50
-            
-    #         # TODO : optimize speed limit sign determine
-
-    #         if obj['class'] == 'sign_60':
-    #             self.speed_limit_60 = True
-
-    #         draw_model(self.model[self.obj_dict[obj['class']]], obj['distance_ang'] + 90, [x, -5, y])
+    def set_view(self, view):
+        self.view = pyrr.matrix44.create_look_at(pyrr.Vector3((view[0])), pyrr.Vector3(view[1]), pyrr.Vector3(view[2]))
 
     def paintGL(self):
-    
+        
         if self.cur_frame_data:
-
+            glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
             draw_model(self.model[0], 180, [0, -5, 0])
-
+            self.idx += 1
             # draw floor dots
             for dot in self.cur_frame_data['dot']:
                 x = dot['x'] / 682 * 70 - 35
@@ -132,4 +101,4 @@ class OpenGLWidget(QOpenGLWidget):
                 if obj['cls'] == 'sign_60':
                     self.speed_limit_60 = True
 
-                draw_model(self.model[self.obj_dict[obj['cls']]], obj['ang'] + 90, [x, -5, y])   
+                draw_model(self.model[self.obj_dict[obj['cls']]], obj['ang'], [x, -5, y])   
