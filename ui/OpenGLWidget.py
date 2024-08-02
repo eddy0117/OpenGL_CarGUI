@@ -34,7 +34,7 @@ class OpenGLWidget(QOpenGLWidget):
                     }
 
         self.idx = 0
-        
+        self.peek = 0
         # TODO : move this to main
         obj_path = 'result2ue5_add.json'
         road_dots_path = 'coord.json'
@@ -54,6 +54,8 @@ class OpenGLWidget(QOpenGLWidget):
     def initializeGL(self):
         # glClearColor(0.0, 0.0, 0.0, 1.0)
 
+        glColor3f(1.0, 1.0, 1.0)  # 設置畫筆顏色為白色
+        glPointSize(5.0)
         
         glClearColor(0.0, 0.0, 0.0, 1)
 
@@ -72,7 +74,7 @@ class OpenGLWidget(QOpenGLWidget):
         
     def set_view(self, view):
         self.view = pyrr.matrix44.create_look_at(pyrr.Vector3((view[0])), pyrr.Vector3(view[1]), pyrr.Vector3(view[2]))
-
+    
     def paintGL(self):    
         if self.cur_frame_data:
             
@@ -81,17 +83,27 @@ class OpenGLWidget(QOpenGLWidget):
             draw_model(self.model[0], 180, [0, -5, 0])
             self.idx += 1
             # draw floor dots
-            t0 = time.time()
+            # t0 = time.time()
+            
+
+            glBindVertexArray(self.model[2]['VAO'])
+
             for dot in self.cur_frame_data['dot']:
                 x = dot['x'] / 200 * 70 - 35
                 y = dot['y'] / 200 * 70 - 35
-            
-                draw_model(self.model[self.dot_dict[str(dot['cls'])]], 90, [x, -5, y])
+
+                draw_dot(self.model[self.dot_dict[str(dot['cls'])]], [x, -5, y])
                 
-            print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
+            
+            # t1 = time.time()
+            # if t1 - t0 > self.peek:
+            #     self.peek = t1 - t0
+            # print('peek : ', round(self.peek * 1000, 4), 'ms')
+
+            # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
             # draw scene objects
-            t0 = time.time()
+            # t0 = time.time()
             for obj in self.cur_frame_data['obj']:
                 if obj['cls'] not in self.obj_dict.keys():
                     continue
@@ -107,4 +119,4 @@ class OpenGLWidget(QOpenGLWidget):
 
                 draw_model(self.model[self.obj_dict[obj['cls']]], obj['ang'], [x, -5, y])   
             
-            print('draw obj time : ', round((time.time() - t0) * 1000, 4), 'ms')
+            # print('draw obj time : ', round((time.time() - t0) * 1000, 4), 'ms')

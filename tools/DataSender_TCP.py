@@ -52,6 +52,7 @@ def send_udp_message():
             img_arr['bev_img'].append(img)
 
         idx = 0
+        t0 = time.time()
         while True:
 
             data_send = {} # reset data_send for new frame
@@ -139,10 +140,11 @@ def send_udp_message():
 
             # client_socket.sendall('end'.encode('utf-8'))
             # delay = random.uniform(0.03, 0.08)
-            delay = 0.2
+            delay = 0.02
+
             time.sleep(delay)
             idx += 1
-
+        print(f'{idx} samples take time : ', round((time.time() - t0), 4), 's')
     finally:
         client_socket.close()
 

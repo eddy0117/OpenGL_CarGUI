@@ -4,9 +4,11 @@ import pyrr
 from tools.TextureLoader import load_texture
 from tools.ObjLoader import ObjLoader
 import math
+import time
 
 def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
-    vertex_src = """
+    vertex_src = \
+    """
     # version 330
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in vec2 a_texture;
@@ -22,7 +24,8 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
     }
     """
 
-    fragment_src = """
+    fragment_src = \
+    """
     # version 330
     in vec2 v_texture;
     out vec4 out_color;
@@ -89,7 +92,8 @@ def deg2rad(deg):
     return deg * math.pi / 180
 
 def draw_model(model_info, deg, model_pos):
-    
+    # t0 = time.time()
+
     # model yaw rotation 
     rot_y = pyrr.Matrix44.from_y_rotation(-deg2rad(deg))
 
@@ -101,5 +105,16 @@ def draw_model(model_info, deg, model_pos):
     # glBindVertexArray(model_info['VBO'])
     model_transform = pyrr.matrix44.multiply(rot_y, pos)
     glUniformMatrix4fv(model_info['model_loc'], 1, GL_FALSE, model_transform)
+    
     glDrawArrays(GL_TRIANGLES, 0, len(model_info['indices']))
 
+    # print('draw time : ', round((time.time() - t0) * 1000, 5), 'ms')
+
+def draw_dot(model_info, model_pos):
+
+    pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
+    
+    glBindTexture(GL_TEXTURE_2D, model_info['textures'])
+    glUniformMatrix4fv(model_info['model_loc'], 1, GL_FALSE, pos)
+    
+    glDrawArrays(GL_TRIANGLES, 0, len(model_info['indices']))

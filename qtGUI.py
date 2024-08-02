@@ -25,12 +25,7 @@ def process_bev_data(img):
 
     for i in range(0, img.shape[0], 3):
         for j in range(0, img.shape[1], 3):
-            # if list(img[i, j]) == [0, 0, 0]:
-            #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':0})
-            # elif list(img[i, j]) == [255, 0, 0]:
-            #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':1})
-            # elif list(img[i, j]) == [0, 0, 255]:
-            #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':2})
+     
             pixel = img[i, j]
             if pixel[0] == 0 and pixel[1] == 0 and pixel[2] == 0:
                 dot_data.append({'x': j, 'y': i, 'cls': 0})
@@ -38,6 +33,8 @@ def process_bev_data(img):
                 dot_data.append({'x': j, 'y': i, 'cls': 1})
             elif pixel[0] == 0 and pixel[1] == 0 and pixel[2] == 255:
                 dot_data.append({'x': j, 'y': i, 'cls': 2})
+
+    # dot_data = sorted(dot_data, key=lambda x: x['cls'])
 
     return dot_data
 
@@ -50,9 +47,8 @@ class Car_MainWindow(Ui_MainWindow):
         self.idx_data = 0
         self.idx_cam_rise = 0
         self.idx_cam_down = 0
-        # self.flag_cam_rise = True
+
         self.flag_cam_rised = False
-        # self.flag_cam_down = True
         self.flag_cam_lock = False
 
         
@@ -113,12 +109,6 @@ class Car_MainWindow(Ui_MainWindow):
  
         for i in range(0, img.shape[0], 3):
             for j in range(0, img.shape[1], 3):
-                # if list(img[i, j]) == [0, 0, 0]:
-                #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':0})
-                # elif list(img[i, j]) == [255, 0, 0]:
-                #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':1})
-                # elif list(img[i, j]) == [0, 0, 255]:
-                #     self.cur_frame_data['dot'].append({'x':j, 'y':i, 'cls':2})
                 pixel = img[i, j]
                 if pixel[0] == 0 and pixel[1] == 0 and pixel[2] == 0:
                     self.cur_frame_data['dot'].append({'x': j, 'y': i, 'cls': 0})
@@ -160,10 +150,7 @@ class Car_MainWindow(Ui_MainWindow):
        
 
         print('==== bev img time ==== : ', round((time.time() - t0) * 1000, 4), 'ms')
-        
-
-    # def process_img_data(self)
-
+    
 
     def isIntersection(self):
         dots_data = self.cur_frame_data['dot']
@@ -278,16 +265,6 @@ class Car_MainWindow(Ui_MainWindow):
     # Updating frame
     def update_img(self, data_rec):
         
-        # for cam, img_data in data_rec['img'].items():
-
-        #     img_data = base64.b64decode(img_data) # -> bytes
-        #     img = np.frombuffer(img_data, np.uint8) # -> numpy array, shape = (N,)
-        #     img = cv2.imdecode(img, cv2.IMREAD_COLOR) # -> numpy array, shape = (H, W, C)
-            
-        #     if cam == 'CAM_FRONT':
-        #         self.img_front.setPixmap(self.convert_cv_qt(img))
-        #     elif cam == 'CAM_BACK':
-        #         self.img_back.setPixmap(self.convert_cv_qt(img))
         self.img_front.setPixmap(self.img_front_data)
         self.img_back.setPixmap(self.img_back_data)
         self.speedometer.display(round(float(data_rec['speed']), 1))
@@ -305,7 +282,10 @@ class Car_MainWindow(Ui_MainWindow):
             self.img_speed_limit.setPixmap(QPixmap('imgs/spd_limit_60.png'))
 
 if __name__ == '__main__':
+
+    # Dummy function to warm up the numba jit
     process_bev_data(np.zeros((200, 200, 3), np.uint8))
+
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     app = QApplication(sys.argv)
     window = QMainWindow()

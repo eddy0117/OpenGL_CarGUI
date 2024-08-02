@@ -6,3 +6,4 @@ pyrr==0.10.3
 pillow==10.4.0
 pyqt5
 easing_functions
+numba
