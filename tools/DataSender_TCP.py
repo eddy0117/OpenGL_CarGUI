@@ -140,7 +140,7 @@ def send_udp_message():
 
             # client_socket.sendall('end'.encode('utf-8'))
             # delay = random.uniform(0.03, 0.08)
-            delay = 0.02
+            delay = 0.1
 
             time.sleep(delay)
             idx += 1

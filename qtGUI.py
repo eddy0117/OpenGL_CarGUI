@@ -234,7 +234,7 @@ class Car_MainWindow(Ui_MainWindow):
         # Setup timer for updating UI
         self.timer_updateUI = QTimer()
         self.timer_updateUI.timeout.connect(self.updateUI)
-        self.timer_updateUI.start(33)
+        self.timer_updateUI.start(50)
         
     
     def updateUI(self):

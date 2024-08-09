@@ -17,43 +17,47 @@ class DataRecievedThread(QObject):
         
 
     def run(self):
+        # Create a TCP socket
         while True:
-            # Create a TCP socket
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
+            # release port
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             # Bind the socket to the address and port
-            self.server_socket.bind(('localhost', 65432))
+            self.server_socket.bind(('192.168.2.103', 65432))
             
             # Setup the socket to listen for incoming connections
             self.server_socket.listen(1)
 
             conn, _ = self.server_socket.accept()
-           
             whole_data = b''
             data_cat = b''
             while True:
                 
-                data = conn.recv(self.MAX_CHUNK_SIZE)
-                data = data_cat + data  # add the rest of the data from last frame
-                if data_cat:
-                    print('data concat!')
-                if not data:
-                    self.server_socket.close()
-                    break
+            
+                
+            
+                        
+                    data = conn.recv(self.MAX_CHUNK_SIZE)
+                    data = data_cat + data  # add the rest of the data from last frame
+                    if data_cat:
+                        print('data concat!')
+                    if not data:
+                        self.server_socket.close()
+                        break
 
-                data_split = data.split(b'\0')
-                if len(data_split) > 1: # End of a package
-                    data_cat = data_split[1] # Preserve the rest of the data (a part of next frame first chunk)
-                    whole_data += data_split[0]
-                    data = json.loads(whole_data.strip(b'\0').decode('utf-8'))
-                    self.data_recieved_signal.emit(data)
-                    whole_data = b''
-                    
-                else:
-                    data_cat = b''
-                    whole_data += data_split[0]
+                    data_split = data.split(b'\0')
+                    if len(data_split) > 1: # End of a package
+                        data_cat = data_split[1] # Preserve the rest of the data (a part of next frame first chunk)
+                        whole_data += data_split[0]
+                        data = json.loads(whole_data.strip(b'\0').decode('utf-8'))
+                        self.data_recieved_signal.emit(data)
+                        whole_data = b''
+                        
+                    else:
+                        data_cat = b''
+                        whole_data += data_split[0]
 
-
+            time.sleep(1)
             # try:
             #     if b'\0' in data: # end of a package
                     

@@ -9,10 +9,10 @@ import time
 def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
     vertex_src = \
     """
-    # version 330
-    layout(location = 0) in vec3 a_position;
-    layout(location = 1) in vec2 a_texture;
-    layout(location = 2) in vec3 a_normal;
+    #version 140
+    in vec3 a_position;
+    in vec2 a_texture;
+    in vec3 a_normal;
     uniform mat4 model;
     uniform mat4 projection;
     uniform mat4 view;
@@ -26,21 +26,28 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
 
     fragment_src = \
     """
-    # version 330
+    #version 140
     in vec2 v_texture;
     out vec4 out_color;
     uniform sampler2D s_texture;
     void main()
     {
-        out_color = texture(s_texture, v_texture);
+        out_color = texture2D(s_texture, v_texture);
     }
     """
+
+    
 
     result = []
 
    
 
     shader = compileProgram(compileShader(vertex_src, GL_VERTEX_SHADER), compileShader(fragment_src, GL_FRAGMENT_SHADER))
+
+    glBindAttribLocation(shader, 0, "a_position")
+    glBindAttribLocation(shader, 1, "a_texture")
+    glBindAttribLocation(shader, 2, "a_normal")
+
     VAO = glGenVertexArrays(len(model_paths))
     VBO = glGenBuffers(len(model_paths))
     # print(len(model_paths), len(texture_paths))
