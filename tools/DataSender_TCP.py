@@ -17,7 +17,7 @@ def send_udp_message():
  
     try:
         
-        obj_path = 'result2ue5_add.json'
+        obj_path = 'result2ue5_v3.json'
         road_dots_path = 'coord.json'
         cam_path_arr = ['CAM_FRONT', 'CAM_BACK']
         img_arr = {}
@@ -140,7 +140,7 @@ def send_udp_message():
 
             # client_socket.sendall('end'.encode('utf-8'))
             # delay = random.uniform(0.03, 0.08)
-            delay = 0.02
+            delay = 0.2
 
             time.sleep(delay)
             idx += 1

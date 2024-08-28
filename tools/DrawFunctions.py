@@ -86,6 +86,15 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, view)
         result.append({'model_loc' : model_loc, 'indices': model_indices, 'VAO' : VAO[idx], 'textures' : textures[idx]})
 
+    
+
+   
+
+
+
+    
+    
+
     return result, proj_loc, view_loc
 
 def deg2rad(deg):
@@ -118,3 +127,18 @@ def draw_dot(model_info, model_pos):
     glUniformMatrix4fv(model_info['model_loc'], 1, GL_FALSE, pos)
     
     glDrawArrays(GL_TRIANGLES, 0, len(model_info['indices']))
+
+def draw_line(model_info, x_list, z_list, y_list):
+
+    # pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
+    glBindTexture(GL_TEXTURE_2D, model_info['textures'])
+    glBegin(GL_LINES)
+    # 定义线段的两个端点
+    for x, z, y in zip(x_list, z_list, y_list):
+        glVertex3f(x, z, y)  
+
+    glEnd()
+    
+
+    
+    

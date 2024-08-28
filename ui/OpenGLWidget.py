@@ -2,6 +2,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import QOpenGLWidget
 from OpenGL.GL import *
+from OpenGL.GLU import *
 import pyrr
 import json
 import os
@@ -15,7 +16,7 @@ class OpenGLWidget(QOpenGLWidget):
        
         self.dot_dict = {
                     '0' : 4, # side
-                    '1' : 2, # crossroad
+                    '1' : 2, # crosswalk
                     '2' : 3  # roadline
                     }
 
@@ -35,11 +36,8 @@ class OpenGLWidget(QOpenGLWidget):
 
         self.idx = 0
         self.peek = 0
-        # TODO : move this to main
-        obj_path = 'result2ue5_add.json'
-        road_dots_path = 'coord.json'
-
-
+     
+        self.map_draw_mode = 'seg'
         self.cur_frame_data = {}
         self.speed_limit_60 = False
 
@@ -65,9 +63,9 @@ class OpenGLWidget(QOpenGLWidget):
         
         self.projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
 
-        self.model, _, self.view_loc = get_model_info(["models/SUV.obj", "models/MasCasual3.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj", "models/truck.obj", "models/front_arrow.obj", "models/front_left_arrow.obj", "models/front_right_arrow.obj"], 
-                                        ["textures/SUV.jpg", "textures/ManCasual3.png", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/scooter.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png", "textures/truck.png", "textures/white.png", "textures/white.png", "textures/white.png"],
-                                        self.view, self.projection)
+        self.model, _, self.view_loc = get_model_info(["models/SUV.obj", "models/walking_person.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj", "models/truck.obj", "models/front_arrow.obj", "models/front_left_arrow.obj", "models/front_right_arrow.obj"], 
+                                        ["textures/SUV.jpg", "textures/scooter.jpg", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/scooter.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png", "textures/truck.png", "textures/white.png", "textures/white.png", "textures/white.png"],
+                                        self.view, self.projection)   
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
@@ -76,6 +74,9 @@ class OpenGLWidget(QOpenGLWidget):
         self.view = pyrr.matrix44.create_look_at(pyrr.Vector3((view[0])), pyrr.Vector3(view[1]), pyrr.Vector3(view[2]))
     
     def paintGL(self):    
+
+        glLineWidth(5)
+        
         if self.cur_frame_data:
             
 
@@ -88,13 +89,23 @@ class OpenGLWidget(QOpenGLWidget):
 
             glBindVertexArray(self.model[2]['VAO'])
 
-            for dot in self.cur_frame_data['dot']:
-                x = dot['x'] / 200 * 70 - 35
-                y = dot['y'] / 200 * 70 - 35
+            if self.map_draw_mode == 'seg':
 
-                draw_dot(self.model[self.dot_dict[str(dot['cls'])]], [x, -5, y])
+                for dot in self.cur_frame_data['dot']:
+                    x = dot['x'] / 200 * 70 - 35
+                    y = dot['y'] / 200 * 70 - 35
+
+                    draw_dot(self.model[self.dot_dict[str(dot['cls'])]], [x, -5, y])
+
+            elif self.map_draw_mode == 'vec':
                 
-            
+                for lines in self.cur_frame_data['line']:
+                    
+                    x = [int(dot_x / 256 * 70 - 35) for dot_x in lines['x']]
+                    y = [int(dot_y / 256 * 70 - 35) for dot_y in lines['y']]
+                    z = [-5 for _ in range(len(x))]
+                    draw_line(self.model[self.dot_dict[str(lines['cls'])]], x, z, y)
+
             # t1 = time.time()
             # if t1 - t0 > self.peek:
             #     self.peek = t1 - t0
@@ -104,6 +115,7 @@ class OpenGLWidget(QOpenGLWidget):
 
             # draw scene objects
             # t0 = time.time()
+            
             for obj in self.cur_frame_data['obj']:
                 if obj['cls'] not in self.obj_dict.keys():
                     continue

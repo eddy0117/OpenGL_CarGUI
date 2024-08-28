@@ -15,12 +15,14 @@ class DataRecievedThread(QObject):
         # Set the maximum size of the message that can be received one time
         self.MAX_CHUNK_SIZE = 5000
         
+        
 
     def run(self):
         while True:
+            
             # Create a TCP socket
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             # Bind the socket to the address and port
             self.server_socket.bind(('localhost', 65432))
             
@@ -28,7 +30,7 @@ class DataRecievedThread(QObject):
             self.server_socket.listen(1)
 
             conn, _ = self.server_socket.accept()
-           
+            
             whole_data = b''
             data_cat = b''
             while True:
@@ -39,6 +41,7 @@ class DataRecievedThread(QObject):
                     print('data concat!')
                 if not data:
                     self.server_socket.close()
+                    print('Connection closed')
                     break
 
                 data_split = data.split(b'\0')
@@ -52,6 +55,7 @@ class DataRecievedThread(QObject):
                 else:
                     data_cat = b''
                     whole_data += data_split[0]
+
 
 
             # try:
