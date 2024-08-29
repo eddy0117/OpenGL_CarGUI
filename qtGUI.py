@@ -38,6 +38,7 @@ class Car_MainWindow(Ui_MainWindow):
     def __init__(self):
         super(Car_MainWindow, self).__init__()
 
+        # 設定 BEVmap 繪製模式 (seg: 分割圖, vec: VectorMap)
         self.bev_map_mode = 'vec'
 
         self.cur_frame_data = {}

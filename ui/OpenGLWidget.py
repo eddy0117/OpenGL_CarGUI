@@ -84,7 +84,7 @@ class OpenGLWidget(QOpenGLWidget):
             draw_model(self.model[0], 180, [0, -5, 0])
             self.idx += 1
             # draw floor dots
-            # t0 = time.time()
+            t0 = time.time()
             
 
             glBindVertexArray(self.model[2]['VAO'])
@@ -101,15 +101,15 @@ class OpenGLWidget(QOpenGLWidget):
                 
                 for lines in self.cur_frame_data['line']:
                     
-                    x = [int(dot_x / 256 * 70 - 35) for dot_x in lines['x']]
-                    y = [int(dot_y / 256 * 70 - 35) for dot_y in lines['y']]
+                    x = [int(dot_x / 256 * 100 - 50) for dot_x in lines['x']]
+                    y = [int(dot_y / 256 * 100 - 50) for dot_y in lines['y']]
                     z = [-5 for _ in range(len(x))]
                     draw_line(self.model[self.dot_dict[str(lines['cls'])]], x, z, y)
 
-            # t1 = time.time()
-            # if t1 - t0 > self.peek:
-            #     self.peek = t1 - t0
-            # print('peek : ', round(self.peek * 1000, 4), 'ms')
+            t1 = time.time()
+            if t1 - t0 > self.peek:
+                self.peek = t1 - t0
+            print('peek : ', round(self.peek * 1000, 4), 'ms')
 
             # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 

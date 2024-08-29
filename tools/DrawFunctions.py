@@ -134,9 +134,16 @@ def draw_line(model_info, x_list, z_list, y_list):
     glBindTexture(GL_TEXTURE_2D, model_info['textures'])
     glBegin(GL_LINES)
     # 定义线段的两个端点
-    for x, z, y in zip(x_list, z_list, y_list):
-        glVertex3f(x, z, y)  
-
+    for idx, (x, z, y) in enumerate(zip(x_list, z_list, y_list)):
+        if idx == 0:
+            # glVertex3f(x, z, y)  
+            last_pts = (x, z, y)
+        else:
+            # print(idx, '11')
+            glVertex3f(last_pts[0], last_pts[1], last_pts[2])
+            glVertex3f(x, z, y)
+            last_pts = (x, z, y)
+        # glVertex3f(x, z, y)
     glEnd()
     
 
