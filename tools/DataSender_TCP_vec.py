@@ -91,6 +91,8 @@ def send_udp_message():
             # data_send['img']['BEV'] = cur_img
 
             # send dots       
+                
+            
             data_dot = []
 
             for dot in cur_coord_data:
@@ -98,14 +100,14 @@ def send_udp_message():
                                  'y' : dot[1],
                                  'cls' : dot[2]})
             # print(data_dot)
-            data_send['line'] = data_dot
+            data_send['dot'] = data_dot
 
             # send objects
             data_obj = []
             for obj_idx in list(cur_obj_data.keys()):
                 obj = cur_obj_data[obj_idx]
-                data_obj.append({'x' : obj['x'], 
-                                 'y' : obj['y'], 
+                data_obj.append({'x' : obj['x'] / 682, 
+                                 'y' : obj['y'] / 682, 
                                  'cls' : obj['class'], 
                                  'ang' : obj['distance_ang'] + 90})
            

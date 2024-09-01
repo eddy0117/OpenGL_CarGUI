@@ -48,7 +48,7 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
 
         model_indices, model_buffer = ObjLoader.load_model(model_path)
         
-
+        
         
         glBindVertexArray(VAO[idx])
         glBindBuffer(GL_ARRAY_BUFFER, VBO[idx])
@@ -73,8 +73,6 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-        # projection = pyrr.matrix44.create_perspective_projection_matrix(45, 1280 / 720, 0.1, 100)
         
 
         model_loc = glGetUniformLocation(shader, "model")
@@ -101,7 +99,6 @@ def deg2rad(deg):
     return deg * math.pi / 180
 
 def draw_model(model_info, deg, model_pos):
-    # t0 = time.time()
 
     # model yaw rotation 
     rot_y = pyrr.Matrix44.from_y_rotation(-deg2rad(deg))
@@ -111,13 +108,12 @@ def draw_model(model_info, deg, model_pos):
 
     glBindVertexArray(model_info['VAO'])
     glBindTexture(GL_TEXTURE_2D, model_info['textures'])
-    # glBindVertexArray(model_info['VBO'])
+
     model_transform = pyrr.matrix44.multiply(rot_y, pos)
     glUniformMatrix4fv(model_info['model_loc'], 1, GL_FALSE, model_transform)
     
     glDrawArrays(GL_TRIANGLES, 0, len(model_info['indices']))
 
-    # print('draw time : ', round((time.time() - t0) * 1000, 5), 'ms')
 
 def draw_dot(model_info, model_pos):
 
@@ -128,22 +124,19 @@ def draw_dot(model_info, model_pos):
     
     glDrawArrays(GL_TRIANGLES, 0, len(model_info['indices']))
 
+
 def draw_line(model_info, x_list, z_list, y_list):
 
-    # pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
     glBindTexture(GL_TEXTURE_2D, model_info['textures'])
     glBegin(GL_LINES)
-    # 定义线段的两个端点
+    
     for idx, (x, z, y) in enumerate(zip(x_list, z_list, y_list)):
         if idx == 0:
-            # glVertex3f(x, z, y)  
             last_pts = (x, z, y)
         else:
-            # print(idx, '11')
             glVertex3f(last_pts[0], last_pts[1], last_pts[2])
             glVertex3f(x, z, y)
             last_pts = (x, z, y)
-        # glVertex3f(x, z, y)
     glEnd()
     
 

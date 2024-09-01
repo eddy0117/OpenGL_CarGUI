@@ -83,8 +83,9 @@ class OpenGLWidget(QOpenGLWidget):
             glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
             draw_model(self.model[0], 180, [0, -5, 0])
             self.idx += 1
-            # draw floor dots
-            t0 = time.time()
+
+            # 繪製道路地圖
+            # t0 = time.time()
             
 
             glBindVertexArray(self.model[2]['VAO'])
@@ -92,38 +93,59 @@ class OpenGLWidget(QOpenGLWidget):
             if self.map_draw_mode == 'seg':
 
                 for dot in self.cur_frame_data['dot']:
-                    x = dot['x'] / 200 * 70 - 35
-                    y = dot['y'] / 200 * 70 - 35
+                    x = dot['x'] * 70 - 35
+                    y = dot['y'] * 70 - 35
 
-                    draw_dot(self.model[self.dot_dict[str(dot['cls'])]], [x, -5, y])
+                    draw_dot(self.model[self.dot_dict[str(int(dot['cls']))]], [x, -5, y])
 
             elif self.map_draw_mode == 'vec':
                 
-                for lines in self.cur_frame_data['line']:
+                for lines in self.cur_frame_data['dot']:
                     
-                    x = [int(dot_x / 256 * 100 - 50) for dot_x in lines['x']]
-                    y = [int(dot_y / 256 * 100 - 50) for dot_y in lines['y']]
-                    z = [-5 for _ in range(len(x))]
+                    x = [dot_x * 70 - 35 for dot_x in lines['x']]
+                    y = [dot_y * 70 - 35 for dot_y in lines['y']]
+                    z = [0 for _ in range(len(x))]
                     draw_line(self.model[self.dot_dict[str(lines['cls'])]], x, z, y)
 
-            t1 = time.time()
-            if t1 - t0 > self.peek:
-                self.peek = t1 - t0
-            print('peek : ', round(self.peek * 1000, 4), 'ms')
+
+                # # DEBUG 畫前後偵測區域
+                # line_1 = [int(l1 / 682 * 70 - 35) for l1 in [395, 415]] # front
+                # line_2 = [int(l1 / 682 * 70 - 35) for l1 in [265, 305]] # back
+               
+                # # draw_line(self.model[self.dot_dict['1']], [-5, 5], [-5, -5], [10, 10])
+                # draw_line(self.model[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_1[0], line_1[1], line_1[1], line_1[0], line_1[0]])
+                # draw_line(self.model[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_2[0], line_2[1], line_2[1], line_2[0], line_2[0]])
+                
+
+            # t1 = time.time()
+            # if t1 - t0 > self.peek:
+            #     self.peek = t1 - t0
+            # print('peek : ', round(self.peek * 1000, 4), 'ms')
 
             # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
             # draw scene objects
-            # t0 = time.time()
-            
+         
+            # 繪製道路物件
             for obj in self.cur_frame_data['obj']:
+                
                 if obj['cls'] not in self.obj_dict.keys():
-                    continue
+                        continue
+                
                 c_x = obj['x']
                 c_y = obj['y']
-                x = c_x / 682 * 100 - 50
-                y = c_y / 682 * 100 - 50
-                
+
+                if self.map_draw_mode == 'seg':
+
+                    x = c_x / 682 * 100 - 50
+                    y = c_y / 682 * 100 - 50
+
+                elif self.map_draw_mode == 'vec':
+                    
+                    # 使用 DataSender_TCP_vec.py 來傳送資料的話 x, y 要設定成 * 100 - 50
+                    x = c_x * 70 - 35
+                    y = c_y * 70 - 35
+          
                 # TODO : optimize speed limit sign determine
 
                 if obj['cls'] == 'sign_60':

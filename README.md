@@ -1,4 +1,8 @@
-# Installation
+# OpenGL - CarGUI
+
+
+
+## Installation
 ```
 pip install -r requirements.txt
 ```
