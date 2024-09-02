@@ -7,7 +7,7 @@
 ![alt text](gif/car_gui_seg_0901.gif)
 
 ## Introduction
-Dashboard system base on PyQt, including surrounding traffic environment, front and back camera images, speedometer, turn singal and speed limit reminder.
+An on-board display system for autonomous driving, including surrounding traffic environment, front and back camera images, speedometer, turn singal and speed limit reminder.
 
 We use those models to get environment infomation:
 

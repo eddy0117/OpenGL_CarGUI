@@ -40,18 +40,23 @@ class Car_MainWindow(Ui_MainWindow):
     def __init__(self):
         super(Car_MainWindow, self).__init__()
 
-        # 設定 BEVmap 繪製模式 (seg: 分割圖, vec: VectorMap)
+        # BEVmap 繪製模式 (seg: 分割圖, vec: VectorMap)
         self.bev_map_mode = 'vec'
 
         self.cur_frame_data = {}
 
         self.idx_data = 0
+
+        # 視角上升，下降狀態索引
         self.idx_cam_rise = 0
         self.idx_cam_down = 0
 
+        # 視角上升完成、視角變動鎖定旗標
         self.flag_cam_rised = False
         self.flag_cam_lock = False
 
+        # 視角變化的緩和函數
+        self.arr_cam_ease = list(map(CubicEaseInOut(start=0, end=25),np.arange(0, 1, 0.1))) 
         
         self.queue_inter = []
         self.tl_dire = 'left'
@@ -60,7 +65,7 @@ class Car_MainWindow(Ui_MainWindow):
         self.flag_frame_changed = False
 
 
-
+        # 初始化接收資料線程
         self.thread_data = QThread()
         self.datathread = DataRecievedThread()
         self.datathread.moveToThread(self.thread_data)
@@ -68,7 +73,7 @@ class Car_MainWindow(Ui_MainWindow):
         self.datathread.data_recieved_signal.connect(self.recv_data)
         self.thread_data.start()
 
-        self.arr_cam_ease = list(map(CubicEaseInOut(start=0, end=25),np.arange(0, 1, 0.1))) 
+        
         
     
     def turn_light(self):
@@ -134,7 +139,10 @@ class Car_MainWindow(Ui_MainWindow):
             img = cv2.resize(img, (200, 200))
             img = np.rot90(img, 1)
             
+            # 去除 BEV map 中心小車圖片
             img[(img.shape[0] // 2 - 8):(img.shape[0] // 2 + 8), (img.shape[1] // 2 - 4):(img.shape[1] // 2 + 3)] = 255
+            
+            # BEV map 二值化 (過濾雜訊顏色)
             img = cv2.threshold(img, 105, 255, cv2.THRESH_BINARY)[1]
 
             self.cur_frame_data['dot'] = process_bev_data(img)
@@ -173,6 +181,7 @@ class Car_MainWindow(Ui_MainWindow):
             for lines in dots_data:
                 if lines['cls'] == 1:
                     for single_dot_x, single_dot_y in zip(lines['x'], lines['y']):
+                        # TODO : 設定x軸(橫向)範圍
             
                         if single_dot_y > front_y_gap[0] and single_dot_y < front_y_gap[1]:
                             in_dot_sum += 1
@@ -268,7 +277,7 @@ class Car_MainWindow(Ui_MainWindow):
         self.timer_turnlight.timeout.connect(self.turn_light)
         self.timer_turnlight.start(300)
 
-        # pyqt GUI 更新計時器
+        # pyqt GUI 更新計時器 (30 fps)
         self.timer_updateUI = QTimer()
         self.timer_updateUI.timeout.connect(self.updateUI)
         self.timer_updateUI.start(33)
