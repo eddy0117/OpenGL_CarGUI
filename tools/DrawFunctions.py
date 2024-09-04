@@ -127,6 +127,7 @@ def draw_dot(model_info, model_pos):
 def draw_line(model_info, x_list, z_list, y_list):
 
     glBindTexture(GL_TEXTURE_2D, model_info['textures'])
+    # glColor3f(1, 1, 1)
     glBegin(GL_LINES)
     
     for idx, (x, z, y) in enumerate(zip(x_list, z_list, y_list)):

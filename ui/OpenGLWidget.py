@@ -8,6 +8,7 @@ import json
 import os
 import time
 from tools.DrawFunctions import *
+import numpy as np
 
 class OpenGLWidget(QOpenGLWidget):
     def __init__(self, parent=None, obj_path=None, road_dots_path=None):
@@ -23,7 +24,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.obj_dict = {
             # nuscenes classes
             'car' : ["modern_car.obj", "modern_car.jpg"],
-            'pedestrian' : ["walking_person.obj", "scooter.jpg"], 
+            'pedestrian' : ["walking_person.obj", "scooter_.jpg"], 
             'motorcycle' : ["scooter.obj", "scooter.jpg"],
             'truck' : ["truck.obj", "truck.jpg"],
             'bus' : ["bus.obj", "bus.jpg"],
@@ -50,11 +51,7 @@ class OpenGLWidget(QOpenGLWidget):
 
 
     def initializeGL(self):
-        # glClearColor(0.0, 0.0, 0.0, 1.0)
 
-        glColor3f(1.0, 1.0, 1.0)  # 設置畫筆顏色為白色
-        glPointSize(5.0)
-        
         glClearColor(0.0, 0.0, 0.0, 1)
 
         self.view = pyrr.matrix44.create_look_at(pyrr.Vector3([0, 3, 20]), 
@@ -65,7 +62,7 @@ class OpenGLWidget(QOpenGLWidget):
 
         self.obj_models, _, self.view_loc = get_model_info(self.obj_dict,
                                         self.view, self.projection)   
-
+        
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
         
@@ -74,8 +71,6 @@ class OpenGLWidget(QOpenGLWidget):
     
     def paintGL(self):    
 
-        glLineWidth(5)
-        
         if self.cur_frame_data:
             
             t0 = time.time()
@@ -98,6 +93,25 @@ class OpenGLWidget(QOpenGLWidget):
                     draw_dot(self.obj_models[self.dot_dict[str(int(dot['cls']))]], [x, -5, y])
 
             elif self.map_draw_mode == 'vec':
+                
+                if 'traj' in self.cur_frame_data.keys():
+
+                    glLineWidth(50)
+
+                    traj = self.cur_frame_data['traj']
+
+
+                    x = np.array(traj)[:, 0] 
+                    y = np.array(traj)[:, 1] 
+                    x = x.tolist()
+                    y = y.tolist()
+                
+        
+                    z = [0 for _ in range(len(x))]
+                    draw_line(self.obj_models[self.dot_dict['0']], x, z, y)
+
+
+                glLineWidth(5)
                 
                 for lines in self.cur_frame_data['dot']:
                     
