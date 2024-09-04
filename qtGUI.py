@@ -121,8 +121,10 @@ class Car_MainWindow(Ui_MainWindow):
             img = cv2.imdecode(img, cv2.IMREAD_COLOR) # -> numpy array, shape = (H, W, C)
             
             if cam == 'CAM_FRONT':
+                img = cv2.resize(img, (211, 119))
                 self.img_front_data = self.convert_cv_qt(img)
             elif cam == 'CAM_BACK':
+                img = cv2.resize(img, (211, 119))
                 self.img_back_data = self.convert_cv_qt(img)
             elif cam == 'BEV':
                 self.img_bev_data = img       
@@ -191,12 +193,9 @@ class Car_MainWindow(Ui_MainWindow):
         
 
         if self.flag_frame_changed:
-        
-            # print('in : ', in_dot_sum, 'out : ', out_dot_sum)
 
             # 為避免鏡頭重複上升下降, 進入路口時, 若前後偵測區域都大於閾值, 只視為進入入口
-        
-            
+             
             if in_dot_sum > THR_INTER_IN_OUT:
 
                 # 加入進入路口 (in), 離開路口 (out) 狀態至 queue_inter
@@ -256,8 +255,8 @@ class Car_MainWindow(Ui_MainWindow):
         self.openGLWidget.map_draw_mode = self.bev_map_mode
 
         # 前後鏡頭RGB畫面顯示
-        self.img_front.setPixmap(self.convert_cv_qt(np.zeros((264, 470, 3), np.uint8)))
-        self.img_back.setPixmap(self.convert_cv_qt(np.zeros((264, 470, 3), np.uint8)))
+        self.img_front.setPixmap(self.convert_cv_qt(np.zeros((119, 211, 3), np.uint8)))
+        self.img_back.setPixmap(self.convert_cv_qt(np.zeros((119, 211, 3), np.uint8)))
         
         # 時速表顯示
         self.speedometer.display(0)

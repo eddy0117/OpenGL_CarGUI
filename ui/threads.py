@@ -37,8 +37,7 @@ class DataRecievedThread(QObject):
                 
                 data = conn.recv(self.MAX_CHUNK_SIZE)
                 data = data_cat + data  # add the rest of the data from last frame
-                if data_cat:
-                    print('data concat!')
+         
                 if not data:
                     self.server_socket.close()
                     print('Connection closed')
@@ -55,47 +54,4 @@ class DataRecievedThread(QObject):
                 else:
                     data_cat = b''
                     whole_data += data_split[0]
-
-
-
-            # try:
-            #     if b'\0' in data: # end of a package
-                    
-            #         print(data.index(b'\0'), data.__len__())
-
-            #         t1 = time.time()
-            #         whole_data += data
-            #         # print(data[-30:], 'data len : ' , data.decode('utf-8').__len__(), 'whole data len : ' , whole_data.decode('utf-8').__len__())
-            #         data = json.loads(whole_data.strip(b'\0').decode('utf-8'))
-            #         self.data_recieved_signal.emit(data)
-            #         whole_data = b''
-            #         print('takes time : ', round((time.time() - t1) * 1000, 4), 'ms')
-            #     else:
-            #         whole_data += data
-            # except json.JSONDecodeError:
-            #     print('===========json decode error===========')
-            #     print(data[-10:])
-            #     break
-                
-            # if chunk_idx == 3:
-            #     whole_data += data
-            #     print(whole_data.__len__(), whole_data.strip(b'\0').__len__())
-            #     data = json.loads(whole_data.strip(b'\0').decode('utf-8'))
-            #     self.data_recieved_signal.emit(data)
-            #     chunk_idx = 0
-            #     whole_data = b''
-            # else:
-            #     whole_data += data
-            #     chunk_idx += 1
-
-       # try:
-
-            #     data, addr = self.server_socket.recvfrom(100000)
-            #     data = json.loads(data.decode('utf-8'))
-            #     self.data_recieved_signal.emit(data)
-
-            # except BlockingIOError:
-            #     pass
-            
-
 
