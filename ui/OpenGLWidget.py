@@ -25,8 +25,9 @@ class OpenGLWidget(QOpenGLWidget):
             'car' : ["modern_car.obj", "modern_car.jpg"],
             'pedestrian' : ["walking_person.obj", "scooter.jpg"], 
             'motorcycle' : ["scooter.obj", "scooter.jpg"],
-            'truck' : ["truck.obj", "truck.png"],
+            'truck' : ["truck.obj", "truck.jpg"],
             'bus' : ["bus.obj", "bus.jpg"],
+            'traffic_cone' : ["cone.obj", "cone.png"],
             # others
             'ego_car' : ["SUV.obj", "SUV.jpg"],
             'cone' : ["cone.obj", "cone.png"],
