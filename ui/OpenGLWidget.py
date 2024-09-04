@@ -25,10 +25,11 @@ class OpenGLWidget(QOpenGLWidget):
             'car' : ["modern_car.obj", "modern_car.jpg"],
             'pedestrian' : ["walking_person.obj", "scooter.jpg"], 
             'motorcycle' : ["scooter.obj", "scooter.jpg"],
-            'cone' : ["cone.obj", "cone.png"], 
             'truck' : ["truck.obj", "truck.png"],
+            'bus' : ["bus.obj", "bus.jpg"],
             # others
             'ego_car' : ["SUV.obj", "SUV.jpg"],
+            'cone' : ["cone.obj", "cone.png"],
             'g_crosswalk' : ["cube.obj", "crossroad.png"], 
             'g_roadline' : ["cube.obj", "roadline.png"], 
             'g_side' : ["cube.obj", "side.png"], 
