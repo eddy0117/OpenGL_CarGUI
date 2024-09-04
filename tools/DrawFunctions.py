@@ -6,7 +6,10 @@ from tools.ObjLoader import ObjLoader
 import math
 import time
 
-def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
+MODEL_PATH_PREFIX = 'models/'
+TEXTURE_PATH_PREFIX = 'textures/'
+
+def get_model_info(model_dict, view=None, projection=None):
     vertex_src = \
     """
     # version 330
@@ -36,19 +39,20 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
     }
     """
 
-    result = []
+    result = {}
 
-   
+    buf_arr_len = len(model_dict)
+
 
     shader = compileProgram(compileShader(vertex_src, GL_VERTEX_SHADER), compileShader(fragment_src, GL_FRAGMENT_SHADER))
-    VAO = glGenVertexArrays(len(model_paths))
-    VBO = glGenBuffers(len(model_paths))
-    # print(len(model_paths), len(texture_paths))
-    for idx, (model_path, texture_path) in enumerate(zip(model_paths, texture_paths)):
+    VAO = glGenVertexArrays(buf_arr_len)
+    VBO = glGenBuffers(buf_arr_len)
+    
+    for idx, (model_name, model_content) in enumerate(model_dict.items()):
 
-        model_indices, model_buffer = ObjLoader.load_model(model_path)
         
-        
+
+        model_indices, model_buffer = ObjLoader.load_model(MODEL_PATH_PREFIX + model_content[0])
         
         glBindVertexArray(VAO[idx])
         glBindBuffer(GL_ARRAY_BUFFER, VBO[idx])
@@ -64,8 +68,10 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
         glEnableVertexAttribArray(2)
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, model_buffer.itemsize * 8, ctypes.c_void_p(20))
 
-        textures = glGenTextures(len(model_paths))
-        load_texture(texture_path, textures[idx])
+        texture_buf = glGenTextures(buf_arr_len)
+
+
+        load_texture(TEXTURE_PATH_PREFIX + model_content[1], texture_buf[idx])
         
 
         glUseProgram(shader)
@@ -82,16 +88,9 @@ def get_model_info(model_paths, texture_paths=None, view=None, projection=None):
 
         glUniformMatrix4fv(proj_loc, 1, GL_FALSE, projection)
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, view)
-        result.append({'model_loc' : model_loc, 'indices': model_indices, 'VAO' : VAO[idx], 'textures' : textures[idx]})
+        result[model_name] = {'model_loc' : model_loc, 'indices': model_indices, 'VAO' : VAO[idx], 'textures' : texture_buf[idx]}
 
-    
-
-   
-
-
-
-    
-    
+        
 
     return result, proj_loc, view_loc
 

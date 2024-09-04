@@ -15,38 +15,36 @@ class OpenGLWidget(QOpenGLWidget):
 
        
         self.dot_dict = {
-                    '0' : 4, # side
-                    '1' : 2, # crosswalk
-                    '2' : 3  # roadline
+                    '0' : 'g_side', # side
+                    '1' : 'g_crosswalk', # crosswalk
+                    '2' : 'g_roadline'  # roadline
                     }
-
+      
         self.obj_dict = {
-                    'car' : 0,
-                    'bus' : 0,
-                    'pedestrian' : 1,
-                    'motorcycle' : 5,
-                    'sign_60' : 6,
-                    'sign_ped' : 7,
-                    'cone' : 8,
-                    'truck' : 9,
-                    'front_arrow' : 10,
-                    'front_left_arrow' : 11,
-                    'front_right_arrow' : 12,
-                    }
-
+            # nuscenes classes
+            'car' : ["modern_car.obj", "modern_car.jpg"],
+            'pedestrian' : ["walking_person.obj", "scooter.jpg"], 
+            'motorcycle' : ["scooter.obj", "scooter.jpg"],
+            'cone' : ["cone.obj", "cone.png"], 
+            'truck' : ["truck.obj", "truck.png"],
+            # others
+            'ego_car' : ["SUV.obj", "SUV.jpg"],
+            'g_crosswalk' : ["cube.obj", "crossroad.png"], 
+            'g_roadline' : ["cube.obj", "roadline.png"], 
+            'g_side' : ["cube.obj", "side.png"], 
+            'sign_60' : ["sign_60.obj", "sign_60.png"],
+            'sign_ped' : ["sign_ped.obj", "sign_ped.png"], 
+            'front_arrow' : ["front_arrow.obj", "white.png"],
+            'front_left_arrow' : ["front_left_arrow.obj", "white.png"],
+            'front_right_arrow' : ["front_right_arrow.obj", "white.png"]
+        }
+        
         self.idx = 0
         self.peek = 0
      
-        self.map_draw_mode = 'seg'
+        self.map_draw_mode = 'vec'
         self.cur_frame_data = {}
         self.speed_limit_60 = False
-
-
-        # with open(os.path.join('json', obj_path), 'r') as f:
-        #     self.data = json.load(f)
-
-        # with open(os.path.join('json', road_dots_path), 'r') as f:
-        #     self.coord = json.load(f)
 
 
     def initializeGL(self):
@@ -63,8 +61,7 @@ class OpenGLWidget(QOpenGLWidget):
         
         self.projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
 
-        self.model, _, self.view_loc = get_model_info(["models/SUV.obj", "models/walking_person.obj", "models/cube.obj", "models/cube.obj", "models/cube.obj", "models/scooter.obj", "models/sign_60.obj", "models/sign_ped.obj", "models/cone.obj", "models/truck.obj", "models/front_arrow.obj", "models/front_left_arrow.obj", "models/front_right_arrow.obj"], 
-                                        ["textures/SUV.jpg", "textures/scooter.jpg", "textures/crossroad.png", "textures/roadline.png", "textures/side.png", "textures/scooter.jpg", "textures/sign_60.png", "textures/sign_ped.png", "textures/cone.png", "textures/truck.png", "textures/white.png", "textures/white.png", "textures/white.png"],
+        self.obj_models, _, self.view_loc = get_model_info(self.obj_dict,
                                         self.view, self.projection)   
 
     def resizeGL(self, w, h):
@@ -79,16 +76,16 @@ class OpenGLWidget(QOpenGLWidget):
         
         if self.cur_frame_data:
             
-
+            t0 = time.time()
             glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
-            draw_model(self.model[0], 180, [0, -5, 0])
+            draw_model(self.obj_models['ego_car'], 180, [0, -5, 0])
             self.idx += 1
 
             # 繪製道路地圖
-            # t0 = time.time()
+            
             
 
-            glBindVertexArray(self.model[2]['VAO'])
+            glBindVertexArray(self.obj_models['g_crosswalk']['VAO'])
 
             if self.map_draw_mode == 'seg':
 
@@ -96,7 +93,7 @@ class OpenGLWidget(QOpenGLWidget):
                     x = dot['x'] * 70 - 35
                     y = dot['y'] * 70 - 35
 
-                    draw_dot(self.model[self.dot_dict[str(int(dot['cls']))]], [x, -5, y])
+                    draw_dot(self.obj_models[self.dot_dict[str(int(dot['cls']))]], [x, -5, y])
 
             elif self.map_draw_mode == 'vec':
                 
@@ -105,22 +102,19 @@ class OpenGLWidget(QOpenGLWidget):
                     x = [dot_x * 70 - 35 for dot_x in lines['x']]
                     y = [dot_y * 70 - 35 for dot_y in lines['y']]
                     z = [0 for _ in range(len(x))]
-                    draw_line(self.model[self.dot_dict[str(lines['cls'])]], x, z, y)
+                    draw_line(self.obj_models[self.dot_dict[str(lines['cls'])]], x, z, y)
 
 
                 # # DEBUG 畫前後偵測區域
                 # line_1 = [int(l1 / 682 * 70 - 35) for l1 in [395, 415]] # front
                 # line_2 = [int(l1 / 682 * 70 - 35) for l1 in [265, 305]] # back
                
-                # # draw_line(self.model[self.dot_dict['1']], [-5, 5], [-5, -5], [10, 10])
-                # draw_line(self.model[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_1[0], line_1[1], line_1[1], line_1[0], line_1[0]])
-                # draw_line(self.model[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_2[0], line_2[1], line_2[1], line_2[0], line_2[0]])
+                # # draw_line(self.obj_models[self.dot_dict['1']], [-5, 5], [-5, -5], [10, 10])
+                # draw_line(self.obj_models[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_1[0], line_1[1], line_1[1], line_1[0], line_1[0]])
+                # draw_line(self.obj_models[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_2[0], line_2[1], line_2[1], line_2[0], line_2[0]])
                 
 
-            # t1 = time.time()
-            # if t1 - t0 > self.peek:
-            #     self.peek = t1 - t0
-            # print('peek : ', round(self.peek * 1000, 4), 'ms')
+            
 
             # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
@@ -151,6 +145,9 @@ class OpenGLWidget(QOpenGLWidget):
                 if obj['cls'] == 'sign_60':
                     self.speed_limit_60 = True
 
-                draw_model(self.model[self.obj_dict[obj['cls']]], obj['ang'], [x, -5, y])   
+                draw_model(self.obj_models[obj['cls']], obj['ang'], [x, -5, y])   
             
-            # print('draw obj time : ', round((time.time() - t0) * 1000, 4), 'ms')
+            # t1 = time.time()
+            # if t1 - t0 > self.peek:
+            #     self.peek = t1 - t0
+            # print('peek : ', round(self.peek * 1000, 4), 'ms')
