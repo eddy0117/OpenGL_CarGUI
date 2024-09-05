@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 import pyrr
-from tools.TextureLoader import load_texture
+from tools.TextureLoader import load_texture, load_texture_by_color
 from tools.ObjLoader import ObjLoader
 import math
 import time
@@ -139,6 +139,33 @@ def draw_line(model_info, x_list, z_list, y_list):
             last_pts = (x, z, y)
     glEnd()
     
+def draw_traj_pred(model_info, colors, x_list, z_list, y_list):
+
+   
+    # glBindTexture(GL_TEXTURE_2D, model_info['textures'])
+    
+    # glColor3f(1, 1, 1)
+    
+    
+    for idx, (x, z, y) in enumerate(zip(x_list, z_list, y_list)):
+        if idx == 0:
+            last_pts = (x, z, y)
+        else:
+            glBindTexture(GL_TEXTURE_2D, colors[idx % len(colors)])
+            glBegin(GL_LINES)
+            glVertex3f(last_pts[0], last_pts[1], last_pts[2])
+            glVertex3f(x, z, y)
+            glVertex3f(last_pts[0] + 0.3, last_pts[1], last_pts[2])
+            glVertex3f(x + 0.3, z, y)
+            last_pts = (x, z, y)
+            glEnd()
 
     
+def get_colors(colors):
+
+    texture_buf = glGenTextures(len(colors))
+    for idx, color in enumerate(colors):
+
+        load_texture_by_color(texture_buf[idx], color)
     
+    return texture_buf

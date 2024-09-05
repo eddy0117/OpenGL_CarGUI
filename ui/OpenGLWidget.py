@@ -9,6 +9,7 @@ import os
 import time
 from tools.DrawFunctions import *
 import numpy as np
+import matplotlib.pyplot as plt
 
 class OpenGLWidget(QOpenGLWidget):
     def __init__(self, parent=None, obj_path=None, road_dots_path=None):
@@ -49,6 +50,10 @@ class OpenGLWidget(QOpenGLWidget):
         self.cur_frame_data = {}
         self.speed_limit_60 = False
 
+        self.color_pal = plt.cm.plasma(range(256))[:, :3] * 255
+
+        self.color_pal = np.round(self.color_pal).astype(np.uint8).tolist()
+
 
     def initializeGL(self):
 
@@ -61,7 +66,9 @@ class OpenGLWidget(QOpenGLWidget):
         self.projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
 
         self.obj_models, _, self.view_loc = get_model_info(self.obj_dict,
-                                        self.view, self.projection)   
+                                        self.view, self.projection)  
+
+        self.color_textures = get_colors(self.color_pal)
         
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
@@ -99,7 +106,8 @@ class OpenGLWidget(QOpenGLWidget):
                     glLineWidth(50)
 
                     traj = self.cur_frame_data['traj']
-
+                    
+                    # glBindTexture(GL_TEXTURE_2D, self.color_textures[0])
 
                     x = np.array(traj)[:, 0] 
                     y = np.array(traj)[:, 1] 
@@ -108,7 +116,7 @@ class OpenGLWidget(QOpenGLWidget):
                 
         
                     z = [0 for _ in range(len(x))]
-                    draw_line(self.obj_models[self.dot_dict['0']], x, z, y)
+                    draw_traj_pred(self.obj_models[self.dot_dict['0']], self.color_textures, x, z, y)
 
 
                 glLineWidth(5)
@@ -163,7 +171,7 @@ class OpenGLWidget(QOpenGLWidget):
 
                 draw_model(self.obj_models[obj['cls']], obj['ang'], [x, -5, y])   
             
-            # t1 = time.time()
-            # if t1 - t0 > self.peek:
-            #     self.peek = t1 - t0
-            # print('peek : ', round(self.peek * 1000, 4), 'ms')
+            t1 = time.time()
+            if t1 - t0 > self.peek:
+                self.peek = t1 - t0
+            print('peek : ', round(self.peek * 1000, 4), 'ms')
