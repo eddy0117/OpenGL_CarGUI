@@ -50,7 +50,8 @@ class OpenGLWidget(QOpenGLWidget):
         self.cur_frame_data = {}
         self.speed_limit_60 = False
 
-        self.color_pal = plt.cm.plasma(range(256))[:, :3] * 255
+        self.color_pal = plt.cm.plasma(range(256))
+        self.color_pal[:, :3] = self.color_pal[:, :3] * 255
 
         self.color_pal = np.round(self.color_pal).astype(np.uint8).tolist()
 
@@ -171,7 +172,7 @@ class OpenGLWidget(QOpenGLWidget):
 
                 draw_model(self.obj_models[obj['cls']], obj['ang'], [x, -5, y])   
             
-            t1 = time.time()
-            if t1 - t0 > self.peek:
-                self.peek = t1 - t0
-            print('peek : ', round(self.peek * 1000, 4), 'ms')
+            # t1 = time.time()
+            # if t1 - t0 > self.peek:
+            #     self.peek = t1 - t0
+            # print('peek : ', round(self.peek * 1000, 4), 'ms')

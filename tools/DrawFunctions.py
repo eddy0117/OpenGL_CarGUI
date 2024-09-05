@@ -141,13 +141,16 @@ def draw_line(model_info, x_list, z_list, y_list):
     
 def draw_traj_pred(model_info, colors, x_list, z_list, y_list):
 
-   
+    offset = 0.3
     # glBindTexture(GL_TEXTURE_2D, model_info['textures'])
     
     # glColor3f(1, 1, 1)
     
     
     for idx, (x, z, y) in enumerate(zip(x_list, z_list, y_list)):
+        x += offset
+        y += offset
+        z += offset
         if idx == 0:
             last_pts = (x, z, y)
         else:

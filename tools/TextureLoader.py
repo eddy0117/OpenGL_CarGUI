@@ -34,6 +34,7 @@ def load_texture_by_color(texture, color):
     # image = Image.open(path)
     # image = image.transpose(Image.FLIP_TOP_BOTTOM)
     # img_data = image.convert("RGBA").tobytes()
+    # pil create array
     
     image = Image.fromarray(np.array(color, dtype='uint8')).convert("RGBA").tobytes()
     
