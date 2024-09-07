@@ -50,8 +50,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.cur_frame_data = {}
         self.speed_limit_60 = False
 
-        self.color_pal = plt.cm.plasma(range(256))
-        self.color_pal[:, :3] = self.color_pal[:, :3] * 255
+        self.color_pal = plt.cm.plasma(range(256)) * 255
 
         self.color_pal = np.round(self.color_pal).astype(np.uint8).tolist()
 
