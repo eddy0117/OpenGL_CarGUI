@@ -1,10 +1,10 @@
 # OpenGL - CarGUI
 
 ### SparaeDrive ( Detection, VectorMap, Motion planning )
-![alt text](gif/car_gui_vec_traj_0907.gif)
+![alt text](gif/car_gui_vec_traj_0907_.gif)
 
 ### Other models ( Detection, SegMap )
-![alt text](gif/car_gui_seg_0907.gif)
+![alt text](gif/car_gui_seg_0907_.gif)
 
 ## Introduction
 An on-board display system for autonomous driving, including surrounding traffic environment, front and back camera images, speedometer, turn singal and speed limit reminder.
