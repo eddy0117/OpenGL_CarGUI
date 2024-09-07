@@ -163,6 +163,8 @@ class OpenGLWidget(QOpenGLWidget):
                     # 使用 DataSender_TCP_vec.py 來傳送資料的話 x, y 要設定成 * 100 - 50
                     x = c_x * 70 - 35
                     y = c_y * 70 - 35
+                    # x = c_x * 100 - 50
+                    # y = c_y * 100 - 50
           
                 # TODO : optimize speed limit sign determine
 

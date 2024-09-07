@@ -1,19 +1,20 @@
 # OpenGL - CarGUI
 
-### Vector Map version
-![alt text](gif/car_gui_vec_0901.gif)
+### SparaeDrive ( Detection, VectorMap, Motion planning )
+![alt text](gif/car_gui_vec_traj_0907.gif)
 
-### Segmentation map version
-![alt text](gif/car_gui_seg_0901.gif)
+### Other models ( Detection, SegMap )
+![alt text](gif/car_gui_seg_0907.gif)
 
 ## Introduction
 An on-board display system for autonomous driving, including surrounding traffic environment, front and back camera images, speedometer, turn singal and speed limit reminder.
 
 We use those models to get environment infomation:
 
+- SparseDrive (detection, vector map, motion planning)
 - StreamPETR (detection)
 - BEVFormer (dectction, segmentation map)
-- SparseDrive (detection, vector map)
+
 
 
 
