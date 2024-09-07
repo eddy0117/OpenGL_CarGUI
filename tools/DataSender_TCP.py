@@ -1,10 +1,11 @@
-import socket
-import os
-import json
-import time
 import base64
-import cv2
+import json
+import os
 import random
+import socket
+import time
+
+import cv2
 
 MAX_CHUNK_SIZE = 5000
 

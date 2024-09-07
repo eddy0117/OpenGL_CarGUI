@@ -1,8 +1,9 @@
-import socket
-import os
-import json
-import time
 import base64
+import json
+import os
+import socket
+import time
+
 import cv2
 
 MAX_CHUNK_SIZE = 10000

@@ -1,8 +1,9 @@
-from PyQt5.QtCore import pyqtSignal, QObject
-import os
-import time
-import socket
 import json
+import os
+import socket
+import time
+
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class DataRecievedThread(QObject):

@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 from ui.OpenGLWidget import OpenGLWidget
 
 

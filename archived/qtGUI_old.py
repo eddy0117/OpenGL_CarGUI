@@ -1,17 +1,20 @@
 
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
-from PyQt5.QtCore import Qt, QTimer, QThread
-from OpenGL.GL import *
-from ui.UIPrototype import Ui_MainWindow
-from PyQt5.QtGui import QImage, QPixmap
-from ui.threads import DataRecievedThread
-import sys
-import numpy as np
-import os
-import cv2
-import json
 import base64
+import json
+import os
+import sys
+
+import cv2
+import numpy as np
+from OpenGL.GL import *
+from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QThread, QTimer
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+
+from ui.threads import DataRecievedThread
+from ui.UIPrototype import Ui_MainWindow
+
 
 class Car_MainWindow(Ui_MainWindow):
     def __init__(self):

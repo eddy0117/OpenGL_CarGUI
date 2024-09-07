@@ -1,9 +1,12 @@
+import json
 import os
+import time
+
 import glfw
 from OpenGL.GL import *
-import time
-import json
+
 from tools.DrawFunctions import *
+
 # glfw callback functions
 
 def main():

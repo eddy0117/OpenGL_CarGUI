@@ -1,15 +1,18 @@
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QOpenGLWidget
-from OpenGL.GL import *
-from OpenGL.GLU import *
-import pyrr
 import json
 import os
 import time
-from tools.DrawFunctions import *
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pyrr
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QOpenGLWidget
+
+from tools.DrawFunctions import DrawFunctions as DF
+
 
 class OpenGLWidget(QOpenGLWidget):
     def __init__(self, parent=None, obj_path=None, road_dots_path=None):
@@ -65,10 +68,10 @@ class OpenGLWidget(QOpenGLWidget):
         
         self.projection = pyrr.matrix44.create_perspective_projection_matrix(45, 800 / 600, 0.1, 100)
 
-        self.obj_models, _, self.view_loc = get_model_info(self.obj_dict,
+        self.obj_models, _, self.view_loc = DF.get_model_info(self.obj_dict,
                                         self.view, self.projection)  
 
-        self.color_textures = get_colors(self.color_pal)
+        self.color_textures = DF.get_colors(self.color_pal)
         
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
@@ -82,7 +85,7 @@ class OpenGLWidget(QOpenGLWidget):
             
             t0 = time.time()
             glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
-            draw_model(self.obj_models['ego_car'], 180, [0, -5, 0])
+            DF.draw_model(self.obj_models['ego_car'], 180, [0, -5, 0])
             self.idx += 1
 
             # 繪製道路地圖
@@ -97,7 +100,7 @@ class OpenGLWidget(QOpenGLWidget):
                     x = dot['x'] * 70 - 35
                     y = dot['y'] * 70 - 35
 
-                    draw_dot(self.obj_models[self.dot_dict[str(int(dot['cls']))]], [x, -5, y])
+                    DF.draw_dot(self.obj_models[self.dot_dict[str(int(dot['cls']))]], [x, -5, y])
 
             elif self.map_draw_mode == 'vec':
                 
@@ -116,7 +119,7 @@ class OpenGLWidget(QOpenGLWidget):
                 
         
                     z = [0 for _ in range(len(x))]
-                    draw_traj_pred(self.obj_models[self.dot_dict['0']], self.color_textures, x, z, y)
+                    DF.draw_traj_pred(self.obj_models[self.dot_dict['0']], self.color_textures, x, z, y)
 
 
                 glLineWidth(5)
@@ -126,7 +129,7 @@ class OpenGLWidget(QOpenGLWidget):
                     x = [dot_x * 70 - 35 for dot_x in lines['x']]
                     y = [dot_y * 70 - 35 for dot_y in lines['y']]
                     z = [0 for _ in range(len(x))]
-                    draw_line(self.obj_models[self.dot_dict[str(lines['cls'])]], x, z, y)
+                    DF.draw_line(self.obj_models[self.dot_dict[str(lines['cls'])]], x, z, y)
 
 
                 # # DEBUG 畫前後偵測區域
@@ -169,7 +172,7 @@ class OpenGLWidget(QOpenGLWidget):
                 if obj['cls'] == 'sign_60':
                     self.speed_limit_60 = True
 
-                draw_model(self.obj_models[obj['cls']], obj['ang'], [x, -5, y])   
+                DF.draw_model(self.obj_models[obj['cls']], obj['ang'], [x, -5, y])   
             
             # t1 = time.time()
             # if t1 - t0 > self.peek:
