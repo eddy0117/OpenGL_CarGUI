@@ -1,6 +1,6 @@
 # OpenGL - CarGUI
 
-### SparaeDrive ( Detection, VectorMap, Motion planning )
+### SparseDrive ( Detection, VectorMap, Motion planning )
 ![alt text](gif/car_gui_vec_traj_0907_.gif)
 
 ### Other models ( Detection, SegMap )
