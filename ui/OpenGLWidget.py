@@ -53,7 +53,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.cur_frame_data = {}
         self.speed_limit_60 = False
 
-        self.color_pal = plt.cm.plasma(range(256)) * 255
+        self.color_pal = plt.cm.plasma(range(256, 0, -1)) * 255
 
         self.color_pal = np.round(self.color_pal).astype(np.uint8).tolist()
 
@@ -74,9 +74,11 @@ class OpenGLWidget(QOpenGLWidget):
         self.color_textures = DF.get_colors(self.color_pal)
         
     def resizeGL(self, w, h):
+
         glViewport(0, 0, w, h)
         
     def set_view(self, view):
+
         self.view = pyrr.matrix44.create_look_at(pyrr.Vector3((view[0])), pyrr.Vector3(view[1]), pyrr.Vector3(view[2]))
     
     def paintGL(self):    
@@ -90,9 +92,6 @@ class OpenGLWidget(QOpenGLWidget):
 
             # 繪製道路地圖
             
-            
-
-            glBindVertexArray(self.obj_models['g_crosswalk']['VAO'])
 
             if self.map_draw_mode == 'seg':
 
@@ -109,8 +108,6 @@ class OpenGLWidget(QOpenGLWidget):
                     glLineWidth(50)
 
                     traj = self.cur_frame_data['traj']
-                    
-                    # glBindTexture(GL_TEXTURE_2D, self.color_textures[0])
 
                     x = np.array(traj)[:, 0] 
                     y = np.array(traj)[:, 1] 
@@ -119,7 +116,7 @@ class OpenGLWidget(QOpenGLWidget):
                 
         
                     z = [0 for _ in range(len(x))]
-                    DF.draw_traj_pred(self.obj_models[self.dot_dict['0']], self.color_textures, x, z, y)
+                    DF.draw_traj_pred(self.color_textures, x, z, y)
 
 
                 glLineWidth(5)

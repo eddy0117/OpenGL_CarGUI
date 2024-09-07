@@ -128,6 +128,8 @@ class DrawFunctions:
     @staticmethod
     def draw_dot(model_info, model_pos):
 
+        glBindVertexArray(model_info['VAO'])
+
         pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
         
         glBindTexture(GL_TEXTURE_2D, model_info['textures'])
@@ -152,13 +154,8 @@ class DrawFunctions:
         glEnd()
 
     @classmethod
-    def draw_traj_pred(cls, model_info, colors, x_list, z_list, y_list):
+    def draw_traj_pred(cls, colors, x_list, z_list, y_list):
 
-        
-        # glBindTexture(GL_TEXTURE_2D, model_info['textures'])
-        
-        # glColor3f(1, 1, 1)
-        
         
         for idx, (x, z, y) in enumerate(zip(x_list, z_list, y_list)):
             x += cls.offset

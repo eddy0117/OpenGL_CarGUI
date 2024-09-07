@@ -6,7 +6,7 @@ import socket
 import time
 
 import cv2
-
+import numpy as np
 MAX_CHUNK_SIZE = 5000
 
 def send_udp_message():
@@ -20,6 +20,7 @@ def send_udp_message():
         
         obj_path = 'result2ue5_v3.json'
         road_dots_path = 'pts.json'
+        traj_path = 'traj.json'
         cam_path_arr = ['CAM_FRONT', 'CAM_BACK']
         img_arr = {}
 
@@ -37,6 +38,9 @@ def send_udp_message():
         
         with open('json/vehicle_monitor.json', 'r') as f:
             vehicle_monitor_arr = json.load(f)
+
+        with open(os.path.join('json', traj_path), 'r') as f:
+            traj_arr = json.load(f)
 
         for cam_path in cam_path_arr:
             img_paths = sorted(os.listdir(os.path.join('dummy_imgs', cam_path)), key=lambda x: int(x.split('.')[0].split('_')[-1]))
@@ -63,7 +67,7 @@ def send_udp_message():
             
             cur_obj_data = data[list(data.keys())[idx]]
             cur_coord_data = coord[list(coord.keys())[idx]]
-            
+            cur_traj_data = traj_arr[list(traj_arr.keys())[idx]]
 
             # send speed and steering
             cur_speed = speed_arr[idx]
@@ -115,6 +119,18 @@ def send_udp_message():
 
             
             data_send['obj'] = data_obj
+
+            # send trajectories
+
+            cur_traj_data = np.array(cur_traj_data)
+            traj = np.mean(cur_traj_data, axis=0)
+
+            traj = traj + 0.5
+            traj[:, 0] = -traj[:, 0]
+            # traj *= 2
+            traj = traj.tolist()
+            
+            data_send['traj'] = traj
 
             # send data_send to server
 
