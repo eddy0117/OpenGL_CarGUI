@@ -5,6 +5,7 @@ PyOpenGL-accelerate==3.1.7
 pyrr==0.10.3
 pillow==10.4.0
 pyqt5
+matplotlib
 opencv-python
 easing_functions
 numba

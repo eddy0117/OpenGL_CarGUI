@@ -18,7 +18,7 @@ from ui.threads import DataRecievedThread
 from ui.UIPrototype import Ui_MainWindow
 
 
-@jit
+# @jit
 def process_bev_data(img):
     dot_data = []
 
