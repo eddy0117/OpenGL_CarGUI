@@ -41,8 +41,8 @@ class Car_MainWindow(Ui_MainWindow):
     def __init__(self):
         super(Car_MainWindow, self).__init__()
 
-        # BEVmap 繪製模式 (seg: 分割圖, vec: VectorMap)
-        self.bev_map_mode = "vec"
+        # 繪製模式 (seg: 分割圖, vec: VectorMap, 2d: 2d bbox)
+        self.draw_mode = "2d"
 
         self.cur_frame_data = {}
 
@@ -136,7 +136,7 @@ class Car_MainWindow(Ui_MainWindow):
 
         t0 = time.time()
 
-        if self.bev_map_mode == "seg":
+        if self.draw_mode == "seg":
             self.cur_frame_data["dot"] = []
 
             img = cv2.cvtColor(self.img_bev_data, cv2.COLOR_BGR2RGB)
@@ -154,7 +154,7 @@ class Car_MainWindow(Ui_MainWindow):
 
             self.cur_frame_data["dot"] = process_bev_data(img)
 
-        elif self.bev_map_mode == "vec":
+        elif self.draw_mode == "2d":
             pass
 
         # print('==== bev img time ==== : ', round((time.time() - t0) * 1000, 4), 'ms')
@@ -170,7 +170,7 @@ class Car_MainWindow(Ui_MainWindow):
         out_dot_sum = 0
         THR_INTER_IN_OUT = 2
 
-        if self.bev_map_mode == "seg":
+        if self.draw_mode == "seg":
             # 定義車前，後的行人穿道偵測線
             front_y_gap = [245 / 682, 275 / 682]
             back_y_gap = [395 / 682, 452 / 682]
@@ -181,7 +181,7 @@ class Car_MainWindow(Ui_MainWindow):
                     if dot["y"] > back_y_gap[0] and dot["y"] < back_y_gap[1]:
                         out_dot_sum += 1
 
-        elif self.bev_map_mode == "vec":
+        elif self.draw_mode == "vec":
             front_y_gap = [395 / 682, 415 / 682]  # front
             back_y_gap = [225 / 682, 305 / 682]  # back
             for lines in dots_data:
@@ -266,7 +266,7 @@ class Car_MainWindow(Ui_MainWindow):
         super(Car_MainWindow, self).setupUi(MainWindow)
 
         # OpenGLWidget 設定道路線繪製模式
-        self.openGLWidget.map_draw_mode = self.bev_map_mode
+        self.openGLWidget.map_draw_mode = self.draw_mode
 
         # 前後鏡頭RGB畫面顯示
         self.img_front.setPixmap(self.convert_cv_qt(np.zeros((119, 211, 3), np.uint8)))
@@ -308,7 +308,8 @@ class Car_MainWindow(Ui_MainWindow):
 
             self.update_img(self.cur_frame_data)
 
-            self.isIntersection()
+            if self.draw_mode in ['seg', 'vec']:
+                self.isIntersection()
 
             if self.queue_inter:
                 if self.queue_inter[0] == "in":

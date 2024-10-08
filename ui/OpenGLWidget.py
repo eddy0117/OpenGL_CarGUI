@@ -8,6 +8,11 @@ from OpenGL.GLU import *
 from PyQt5.QtWidgets import QOpenGLWidget
 
 from tools.DrawFunctions import DrawFunctions as DF
+import joblib
+# 從檔案載入模型
+
+
+
 
 
 class OpenGLWidget(QOpenGLWidget):
@@ -50,8 +55,10 @@ class OpenGLWidget(QOpenGLWidget):
         self.speed_limit_60 = False
 
         self.color_pal = plt.cm.plasma(range(256, 0, -1)) * 255
-
         self.color_pal = np.round(self.color_pal).astype(np.uint8).tolist()
+
+        # 載入預測 distance 模型
+        self.svg_reg = joblib.load('tools/svr_rbf_model.joblib')
 
     def initializeGL(self):
         glClearColor(0.0, 0.0, 0.0, 1)
@@ -130,10 +137,20 @@ class OpenGLWidget(QOpenGLWidget):
 
             # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
-            # draw scene objects
+
+
+            # 2d 模式下將 box_h 輸入模型預測 distance
+            if self.map_draw_mode == "2d":
+                # 取得所有車輛的 box_h
+                inputs = np.array([it['h'] for it in self.cur_frame_data["obj"] if it['cls'] == 'car'])
+                if inputs.shape[0] != 0:
+                    distance_arr = self.svg_reg.predict(inputs.reshape(-1, 1)).flatten() / 500
+
+
 
             # 繪製道路物件
-            for obj in self.cur_frame_data["obj"]:
+            car_idx = 0
+            for idx, obj in enumerate(self.cur_frame_data["obj"]):
                 if obj["cls"] not in self.obj_dict.keys():
                     continue
 
@@ -141,6 +158,7 @@ class OpenGLWidget(QOpenGLWidget):
                 c_y = obj["y"]
                 cls = obj["cls"]
                 ang = obj["ang"]
+                x, y = None, None
 
                 if self.map_draw_mode == "seg":
                     x = c_x / 682 * 100 - 50
@@ -153,14 +171,31 @@ class OpenGLWidget(QOpenGLWidget):
                     # x = c_x * 100 - 50
                     # y = c_y * 100 - 50
 
-                    # is_stop只有在vec(SparseDrive)模式下才會有
+                    # is_stop只有在vec(SparseDrive)模式下才會有，有煞車燈
                     if (obj["is_stop"] == 1) and (cls == "car"):
                         cls = "car_stop"
 
+                # 2d 模式目前只顯示車輛
+                elif self.map_draw_mode == "2d" and obj["cls"] == 'car':
+                    # 中心線座標 x 軸為 800 (nuscene圖片為 1600x900)
+                    # 這裡的 x, y 指的是 2d bbox 在畫面上的左上角座標
+                    SCALE = 2
+                    w = obj["w"]
+                    h = obj["h"]
+                    x = (c_x + w) / 2 # 2d bbox 中心 x 座標
+                    x = (x - 800) * 0.1 #* 70 - 35
+
+                    y = -distance_arr[car_idx] * 40
+                    car_idx += 1
+                
                 # TODO : optimize speed limit sign determine
 
                 if obj["cls"] == "sign_60":
                     self.speed_limit_60 = True
+
+                # 為了2d模式只顯示車輛
+                if not x or not y:
+                    continue
 
                 DF.draw_model(self.obj_models[cls], ang, [x, -5, y])
 
