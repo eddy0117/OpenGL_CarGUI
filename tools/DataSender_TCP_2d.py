@@ -80,7 +80,7 @@ def send_udp_message():
                                  'w' : obj['w'],
                                  'h' : obj['h'],
                                  'cls' : obj['cls'], 
-                                 'ang' : 0})
+                                 'ang' : 180})
            
 
             

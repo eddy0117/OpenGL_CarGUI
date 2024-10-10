@@ -6,7 +6,7 @@ import pyrr
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PyQt5.QtWidgets import QOpenGLWidget
-
+from tools.utils import twoD_2_threeD, rotate_2d_point
 from tools.DrawFunctions import DrawFunctions as DF
 import joblib
 # 從檔案載入模型
@@ -59,6 +59,11 @@ class OpenGLWidget(QOpenGLWidget):
 
         # 載入預測 distance 模型
         self.svg_reg = joblib.load('tools/svr_rbf_model.joblib')
+        
+        # nuscenes 某幀內參
+        self.intrinsic = np.array([[1.26641720e+03, 0.00000000e+00, 8.16267020e+02],
+                                    [0.00000000e+00, 1.26641720e+03, 4.91507066e+02],
+                                    [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
 
     def initializeGL(self):
         glClearColor(0.0, 0.0, 0.0, 1)
@@ -144,8 +149,8 @@ class OpenGLWidget(QOpenGLWidget):
                 # 取得所有車輛的 box_h
                 inputs = np.array([it['h'] for it in self.cur_frame_data["obj"] if it['cls'] == 'car'])
                 if inputs.shape[0] != 0:
-                    distance_arr = self.svg_reg.predict(inputs.reshape(-1, 1)).flatten() / 500
-
+                    distance_arr = self.svg_reg.predict(inputs.reshape(-1, 1)).flatten()
+                    
 
 
             # 繪製道路物件
@@ -179,15 +184,29 @@ class OpenGLWidget(QOpenGLWidget):
                 elif self.map_draw_mode == "2d" and obj["cls"] == 'car':
                     # 中心線座標 x 軸為 800 (nuscene圖片為 1600x900)
                     # 這裡的 x, y 指的是 2d bbox 在畫面上的左上角座標
-                    SCALE = 2
+           
                     w = obj["w"]
                     h = obj["h"]
-                    x = (c_x + w) / 2 # 2d bbox 中心 x 座標
-                    x = (x - 800) * 0.1 #* 70 - 35
+                    x = c_x + w // 2
+                    y = c_y + h
+                    
+                    # x = (c_x + w) / 2 # 2d bbox 中心 x 座標
+                    # x = (x - 800) * 0.1 + 20 #* 70 - 35
+                    # x = x_offset_arr[car_idx] * 3 - 39
+                    # y = -distance_arr[car_idx] * 40
 
-                    y = -distance_arr[car_idx] * 40
+                    x, y, z = twoD_2_threeD((x + w) // 2, y + h, distance_arr[car_idx] / 8, self.intrinsic)
+                    # y = -z 
+                    # x = x
+                    x, y = rotate_2d_point(x, -z, 20)
+                    x = x * 1.2 - 3
+                    y = y * 1.2 - 5
+             
                     car_idx += 1
                 
+                    if c_y + h > 900:
+                        continue
+
                 # TODO : optimize speed limit sign determine
 
                 if obj["cls"] == "sign_60":
