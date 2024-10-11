@@ -1,0 +1,19 @@
+# 繪製模式 
+# seg: 3d bbox + 分割圖, 
+# vec: 3d bbox + VectorMap, 
+# 2d: 2d bbox, 
+# 3d: 3d bbox
+draw_mode: "3d"
+
+# ip 配置
+ip: "localhost"
+port: 65432
+
+# 素材路徑
+mat_dict:
+    left: "src/imgs/green_arrow_left.png"
+    right: "src/imgs/green_arrow_right.png"
+    left_dark: "src/imgs/green_arrow_left_dark.png"
+    right_dark: "src/imgs/green_arrow_right_dark.png"
+    spd_limit_60: "src/imgs/spd_limit_60.png"
+    

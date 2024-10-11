@@ -9,8 +9,8 @@ from tools.TextureLoader import load_texture, load_texture_by_color
 
 
 class DrawFunctions:
-    model_path_prefix = "models/"
-    texture_path_prefix = "textures/"
+    model_path_prefix = "src/models/"
+    texture_path_prefix = "src/textures/"
     offset = 0.3
     vertex_src = """
         # version 330

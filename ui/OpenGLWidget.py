@@ -165,16 +165,21 @@ class OpenGLWidget(QOpenGLWidget):
                 ang = obj["ang"]
                 x, y = None, None
 
-                if self.map_draw_mode == "seg":
-                    x = c_x / 682 * 100 - 50
-                    y = c_y / 682 * 100 - 50
+                if self.map_draw_mode == "3d":
+                    scale = 70
+                    x = c_x * scale - scale / 2
+                    y = c_y * scale - scale / 2
+
+                elif self.map_draw_mode == "seg":
+                    scale = 100
+                    x = c_x / 682 * scale - scale / 2
+                    y = c_y / 682 * scale - scale / 2
 
                 elif self.map_draw_mode == "vec":
                     # 使用 DataSender_TCP_vec.py 來傳送資料的話 x, y 要設定成 * 100 - 50
-                    x = c_x * 70 - 35
-                    y = c_y * 70 - 35
-                    # x = c_x * 100 - 50
-                    # y = c_y * 100 - 50
+                    scale = 70
+                    x = c_x * scale - scale / 2
+                    y = c_y * scale - scale / 2
 
                     # is_stop只有在vec(SparseDrive)模式下才會有，有煞車燈
                     if (obj["is_stop"] == 1) and (cls == "car"):
@@ -189,11 +194,6 @@ class OpenGLWidget(QOpenGLWidget):
                     h = obj["h"]
                     x = c_x + w // 2
                     y = c_y + h
-                    
-                    # x = (c_x + w) / 2 # 2d bbox 中心 x 座標
-                    # x = (x - 800) * 0.1 + 20 #* 70 - 35
-                    # x = x_offset_arr[car_idx] * 3 - 39
-                    # y = -distance_arr[car_idx] * 40
 
                     x, y, z = twoD_2_threeD((x + w) // 2, y + h, distance_arr[car_idx] / 8, self.intrinsic)
                     # y = -z 

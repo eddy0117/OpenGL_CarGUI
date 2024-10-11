@@ -21,11 +21,11 @@ We use those models to get environment infomation:
 ### Available display objects in surronding environment :
 - car
 - truck
+- bus
 - pedestrian
-- scooter
-- cone
-- signs
-- ground traffic signs
+- motorcycle
+- traffic_cone
+
 
 ## Installation
 ```
@@ -36,4 +36,41 @@ Ubuntu requires opencv-headless
 ```
 pip install opencv-python-headless
 ```
+
+## Usage
+
+###  set configuration 
+
+check config.yaml
+
+draw_mode
+
+- "3d" for 3d bbox only
+- "2d" for 2d bbox only
+- "seg" (BEVFormer) for segmemtation bev map + 3d bbox
+- "vec" (SparseDrive) for vector map + 3d bbox + motion preditcion
+
+
+ip, port: receiver client ip
+ 
+### data format
+one frame data example:<br>
+3d mode:
+```
+{
+ 'img':{
+        'CAM_FRONT': str,
+        'CAM_BACK':  str
+        },   
+ 'obj':[{
+        'x':    float,
+        'y':    float,
+        'cls':  str,
+        'ang':  float
+        }, ...]
+ 'speed':       float,  # optional
+ 'steering':    float   # optional
+}
+```
+- img<br>
 

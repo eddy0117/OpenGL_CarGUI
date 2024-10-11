@@ -6,6 +6,7 @@ import time
 
 import cv2
 import numpy as np
+import yaml
 from easing_functions import CubicEaseInOut
 from numba import jit
 from OpenGL.GL import *
@@ -40,9 +41,17 @@ def process_bev_data(img):
 class Car_MainWindow(Ui_MainWindow):
     def __init__(self):
         super(Car_MainWindow, self).__init__()
+        
+        # 載入設定檔 
+        with open("config.yaml", "r") as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+            self.draw_mode = config["draw_mode"]
+            ip = config["ip"]
+            port = config["port"]
+            mat_dict = config["mat_dict"]
 
-        # 繪製模式 (seg: 分割圖, vec: VectorMap, 2d: 2d bbox)
-        self.draw_mode = "2d"
+        
+        self.mat_container = self.load_material_img(mat_dict)
 
         self.cur_frame_data = {}
 
@@ -69,7 +78,7 @@ class Car_MainWindow(Ui_MainWindow):
 
         # 初始化接收資料線程
         self.thread_data = QThread()
-        self.datathread = DataRecievedThread()
+        self.datathread = DataRecievedThread(ip=ip, port=port)
         self.datathread.moveToThread(self.thread_data)
         self.thread_data.started.connect(self.datathread.run)
         self.datathread.data_recieved_signal.connect(self.recv_data)
@@ -78,29 +87,39 @@ class Car_MainWindow(Ui_MainWindow):
     def turn_light(self):
         """
         顯示方向燈
-        """
-        if self.display_tl:
-            if self.isLightOn:
-                self.isLightOn = False
-                if self.tl_dire == "left":
-                    self.img_steer_left.setPixmap(QPixmap("imgs/green_arrow_left.png"))
-                elif self.tl_dire == "right":
-                    self.img_steer_right.setPixmap(
-                        QPixmap("imgs/green_arrow_right.png")
-                    )
+        """       
+        if self.cur_frame_data:
+            steering = round(float(self.cur_frame_data["steering"]), 2)
+            # 判斷左右轉
+            if steering > 60:
+                self.display_tl = True
+                self.tl_dire = "left"
+            elif steering < -60:
+                self.display_tl = True
+                self.tl_dire = "right"
             else:
-                if self.tl_dire == "left":
-                    self.img_steer_left.setPixmap(
-                        QPixmap("imgs/green_arrow_left_dark.png")
-                    )
-                elif self.tl_dire == "right":
-                    self.img_steer_right.setPixmap(
-                        QPixmap("imgs/green_arrow_right_dark.png")
-                    )
-                self.isLightOn = True
-        else:
-            self.img_steer_left.setPixmap(QPixmap("imgs/green_arrow_left_dark.png"))
-            self.img_steer_right.setPixmap(QPixmap("imgs/green_arrow_right_dark.png"))
+                self.display_tl = False
+
+            if self.display_tl:
+                if self.isLightOn:
+                    self.isLightOn = False
+                    if self.tl_dire == "left":
+                        self.img_steer_left.setPixmap(self.mat_container["left"])
+                    elif self.tl_dire == "right":
+                        self.img_steer_right.setPixmap(self.mat_container["right"])
+                else:
+                    if self.tl_dire == "left":
+                        self.img_steer_left.setPixmap(
+                            self.mat_container["left_dark"]
+                        )
+                    elif self.tl_dire == "right":
+                        self.img_steer_right.setPixmap(
+                            self.mat_container["right_dark"]
+                        )
+                    self.isLightOn = True
+            else:
+                self.img_steer_left.setPixmap(self.mat_container["left_dark"])
+                self.img_steer_right.setPixmap(self.mat_container["right_dark"])
 
     def convert_cv_qt(self, cv_img):
         rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
@@ -118,6 +137,18 @@ class Car_MainWindow(Ui_MainWindow):
         self.cur_frame_data = data_rec
         self.flag_frame_changed = True
         # t0 = time.time()
+
+        # 如果沒有接收到速度資料則隱藏時速表
+        if "speed" not in data_rec.keys():
+            data_rec["speed"] = 0
+            data_rec["steering"] = 0
+        else:
+            self.speedometer.show()
+            self.img_steer_left.show()
+            self.img_steer_right.show()
+            self.l_km.show()
+
+        # 鏡頭影像解碼
         for cam, img_data in data_rec["img"].items():
             img_data = base64.b64decode(img_data)  # -> bytes
             img = np.frombuffer(img_data, np.uint8)  # -> numpy array, shape = (N,)
@@ -153,9 +184,6 @@ class Car_MainWindow(Ui_MainWindow):
             img = cv2.threshold(img, 105, 255, cv2.THRESH_BINARY)[1]
 
             self.cur_frame_data["dot"] = process_bev_data(img)
-
-        elif self.draw_mode == "2d":
-            pass
 
         # print('==== bev img time ==== : ', round((time.time() - t0) * 1000, 4), 'ms')
 
@@ -279,9 +307,16 @@ class Car_MainWindow(Ui_MainWindow):
         self.img_steer_left.setScaledContents(True)
         self.img_steer_right.setScaledContents(True)
         self.img_speed_limit.setScaledContents(True)
-        self.img_steer_left.setPixmap(QPixmap("imgs/green_arrow_left_dark.png"))
-        self.img_steer_right.setPixmap(QPixmap("imgs/green_arrow_right_dark.png"))
+        self.img_steer_left.setPixmap(self.mat_container["left_dark"])
+        self.img_steer_right.setPixmap(self.mat_container["right_dark"])
+        
+        # 開始時隱藏時速表、方向燈
+        self.speedometer.hide()
+        self.img_steer_left.hide()
+        self.img_steer_right.hide()
+        self.l_km.hide()
 
+        
     def setupTimer(self):
         self.timer_frame = QTimer()
 
@@ -295,6 +330,12 @@ class Car_MainWindow(Ui_MainWindow):
         self.timer_updateUI.timeout.connect(self.updateUI)
         self.timer_updateUI.start(33)
 
+    def load_material_img(self, mat_dict):
+        mat_container = {}
+        for mat_name, mat_path in mat_dict.items():
+            mat_container[mat_name] = QPixmap(mat_path)
+        return mat_container
+    
     def updateUI(self):
         """
         更新 OpenGLWidget 畫面
@@ -335,20 +376,12 @@ class Car_MainWindow(Ui_MainWindow):
         self.img_front.setPixmap(self.img_front_data)
         self.img_back.setPixmap(self.img_back_data)
         self.speedometer.display(round(float(data_rec["speed"]), 1))
-        steering = round(float(data_rec["steering"]), 2)
+        
 
-        # 方向燈顯示
-        if steering > 60:
-            self.display_tl = True
-            self.tl_dire = "left"
-        elif steering < -60:
-            self.display_tl = True
-            self.tl_dire = "right"
-        else:
-            self.display_tl = False
+        
 
         if self.openGLWidget.speed_limit_60:
-            self.img_speed_limit.setPixmap(QPixmap("imgs/spd_limit_60.png"))
+            self.img_speed_limit.setPixmap(self.mat_container["spd_limit_60"])
 
 
 if __name__ == "__main__":

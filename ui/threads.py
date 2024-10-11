@@ -7,11 +7,13 @@ from PyQt5.QtCore import QObject, pyqtSignal
 class DataRecievedThread(QObject):
     data_recieved_signal = pyqtSignal(dict)
 
-    def __init__(self):
+    def __init__(self, ip, port):
         super(DataRecievedThread, self).__init__()
 
         # Set the maximum size of the message that can be received one time
         self.MAX_CHUNK_SIZE = 5000
+        self.ip = ip
+        self.port = port
 
     def run(self):
         while True:
@@ -19,7 +21,7 @@ class DataRecievedThread(QObject):
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             # Bind the socket to the address and port
-            self.server_socket.bind(("localhost", 65432))
+            self.server_socket.bind((self.ip, self.port))
 
             # Setup the socket to listen for incoming connections
             self.server_socket.listen(1)
