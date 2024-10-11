@@ -167,8 +167,8 @@ class OpenGLWidget(QOpenGLWidget):
 
                 if self.map_draw_mode == "3d":
                     scale = 70
-                    x = c_x * scale - scale / 2
-                    y = c_y * scale - scale / 2
+                    x = c_x * scale #- scale / 2
+                    y = c_y * scale #- scale / 2
 
                 elif self.map_draw_mode == "seg":
                     scale = 100

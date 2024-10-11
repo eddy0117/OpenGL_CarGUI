@@ -81,7 +81,7 @@ one frame data example:<br>
 all image shape should be resize to (470, 264) and encoded by base64
 
 - obj (list of dicts)<br>
-all object of current frame, x y are object world coordinate, and should be normalized to 0 ~ 1, cls is in one of available classes we mention above, ang is object heading angle
+all object of current frame, x y are object world coordinate, and should be normalized to -0.5 ~ 0.5, cls is in one of available classes we mention above, ang is object heading angle
 
 - speed (optional)<br>
 ego car speed
