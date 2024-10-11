@@ -89,7 +89,7 @@ def send_udp_message():
             data_send["obj"] = data_obj
             # data_send["dot"] = data_dot
             # data_send["traj"] = traj
-            import pdb; pdb.set_trace()
+
             data_send = json.dumps(data_send).encode("utf-8")
 
 
