@@ -72,11 +72,11 @@ one frame data example:<br>
  'steering':    float   # optional
 }
 ```
-- img (dict)<br>
+- img (dict)<br><br>
 all image shape should be resize to (470, 264) and encoded by base64
-- obj (list of dicts)<br>
+- obj (list of dicts)<br><br>
 all object of current frame, x y are object world coordinate, and should be normalized to 0 ~ 1, cls is in one of available classes we mention above, ang is object heading angle
-- speed (optional)<br>
+- speed (optional)<br><br>
 ego car speed
-- steering<br>
+- steering<br><br>
 ego car steering
