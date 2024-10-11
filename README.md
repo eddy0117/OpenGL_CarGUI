@@ -77,14 +77,17 @@ one frame data example:<br>
  'steering':    float   # optional
 }
 ```
-- img (dict)<br><br>
-all image shape should be resize to (470, 264) and encoded by base64<br>
-- obj (list of dicts)<br><br>
-all object of current frame, x y are object world coordinate, and should be normalized to 0 ~ 1, cls is in one of available classes we mention above, ang is object heading angle<br>
-- speed (optional)<br><br>
-ego car speed<br>
-- steering (optional)<br><br>
-ego car steering<br>
+- img (dict)<br>
+all image shape should be resize to (470, 264) and encoded by base64
+
+- obj (list of dicts)<br>
+all object of current frame, x y are object world coordinate, and should be normalized to 0 ~ 1, cls is in one of available classes we mention above, ang is object heading angle
+
+- speed (optional)<br>
+ego car speed
+
+- steering (optional)<br>
+ego car steering
 
 ### 4. send data to GUI client
 using TCP to connent GUI client and send single frame data
