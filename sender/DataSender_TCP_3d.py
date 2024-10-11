@@ -26,11 +26,11 @@ def send_udp_message():
             data = json.load(f)
 
 
-        with open("json/speeds.txt", "r") as f:
-            speed_arr = f.readlines()
+        # with open("json/speeds.txt", "r") as f:
+        #     speed_arr = f.readlines()
 
-        with open("json/vehicle_monitor.json", "r") as f:
-            vehicle_monitor_arr = json.load(f)
+        # with open("json/vehicle_monitor.json", "r") as f:
+        #     vehicle_monitor_arr = json.load(f)
 
 
         for cam_path in cam_path_arr:
@@ -55,8 +55,8 @@ def send_udp_message():
             cur_obj_data = data[list(data.keys())[idx]]
 
             # send speed and steering
-            cur_speed = speed_arr[idx]
-            cur_steering = vehicle_monitor_arr[idx]["steering"]
+            # cur_speed = speed_arr[idx]
+            # cur_steering = vehicle_monitor_arr[idx]["steering"]
 
             # send objects
             data_obj = []
@@ -67,6 +67,7 @@ def send_udp_message():
                         "x": obj["x"] / 682,
                         "y": obj["y"] / 682,
                         "cls": obj["class"],
+                        "ang": obj["distance_ang"] + 90
                     }
                 )
 
@@ -76,7 +77,8 @@ def send_udp_message():
             data_send["img"] = {}
             for cam_path in cam_path_arr:
                 cur_img = img_arr[cam_path][idx]
-                # base64 encode image
+
+                # base64 encode image to byte
                 _, cur_img = cv2.imencode(".jpg", cur_img)
                 cur_img = base64.b64encode(cur_img).decode(
                     "utf-8"
@@ -84,11 +86,10 @@ def send_udp_message():
 
                 data_send["img"][cam_path] = cur_img
 
-            data_send["speed"] = cur_speed
-            data_send["steering"] = cur_steering
+            # data_send["speed"] = cur_speed
+            # data_send["steering"] = cur_steering
             data_send["obj"] = data_obj
-            # data_send["dot"] = data_dot
-            # data_send["traj"] = traj
+         
 
             data_send = json.dumps(data_send).encode("utf-8")
 
@@ -96,13 +97,14 @@ def send_udp_message():
             data_send += ("\0").encode("utf-8")
             print("send length : ", len(data_send))
             for i in range(0, len(data_send), MAX_CHUNK_SIZE):
-                # print('segment length : ',len(data_send[i:i+MAX_CHUNK_SIZE]))
+                
                 client_socket.sendall(data_send[i : i + MAX_CHUNK_SIZE])
 
             delay = 0.2
 
             time.sleep(delay)
             idx += 1
+
         print(f"{idx} samples take time : ", round((time.time() - t0), 4), "s")
     finally:
         client_socket.close()

@@ -1,15 +1,15 @@
-# 繪製模式 
-# seg: 3d bbox + 分割圖, 
+# draw mode 
+# seg: 3d bbox + BEV segmentationMap, 
 # vec: 3d bbox + VectorMap, 
 # 2d: 2d bbox, 
 # 3d: 3d bbox
 draw_mode: "3d"
 
-# ip 配置
+# ip configuration
 ip: "localhost"
 port: 65432
 
-# 素材路徑
+# material image paths
 mat_dict:
     left: "src/imgs/green_arrow_left.png"
     right: "src/imgs/green_arrow_right.png"

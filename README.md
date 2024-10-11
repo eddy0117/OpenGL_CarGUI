@@ -39,7 +39,7 @@ pip install opencv-python-headless
 
 ## Usage
 
-###  set configuration 
+### 1. set configuration 
 
 check config.yaml
 
@@ -52,8 +52,13 @@ draw_mode
 
 
 ip, port: receiver client ip
+
+### 2. start GUI client
+```
+python qtGUI.py
+```
  
-### data format
+### 3. check data format
 one frame data example:<br>
 3d mode:
 ```
@@ -73,10 +78,35 @@ one frame data example:<br>
 }
 ```
 - img (dict)<br><br>
-all image shape should be resize to (470, 264) and encoded by base64
+all image shape should be resize to (470, 264) and encoded by base64<br>
 - obj (list of dicts)<br><br>
-all object of current frame, x y are object world coordinate, and should be normalized to 0 ~ 1, cls is in one of available classes we mention above, ang is object heading angle
+all object of current frame, x y are object world coordinate, and should be normalized to 0 ~ 1, cls is in one of available classes we mention above, ang is object heading angle<br>
 - speed (optional)<br><br>
-ego car speed
-- steering<br><br>
-ego car steering
+ego car speed<br>
+- steering (optional)<br><br>
+ego car steering<br>
+
+### 4. send data to GUI client
+using TCP to connent GUI client and send single frame data
+```
+import socket
+import json
+
+MAX_CHUNK_SIZE = 5000
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect((${CLIENT_IP}$, ${CLIENT_PORT}$))
+
+'''
+preparing single frame data...
+'''
+
+data_send = json.dumps(data_send).encode("utf-8")
+
+data_send += ("\0").encode("utf-8")
+
+for i in range(0, len(data_send), MAX_CHUNK_SIZE):
+    client_socket.sendall(data_send[i : i + MAX_CHUNK_SIZE])
+
+```
+
+you can refer sender/DataSender_TCP_3d.py for more detail
