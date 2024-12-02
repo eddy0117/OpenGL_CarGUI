@@ -178,14 +178,6 @@ class DrawFunctions:
     
     @classmethod
     def draw_occ_dot(cls, colors, c, positions):
-        """
-        批量繪製點的優化版本
-        
-        Args:
-            model_info: 模型信息字典
-            positions: numpy數組形狀為 (N, 3) 的點位置數組
-        """
-
 
         points_array = np.array(positions, dtype=np.float32)
         # glUseProgram(cls.shader)
