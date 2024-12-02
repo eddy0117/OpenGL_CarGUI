@@ -6,7 +6,7 @@ import socket
 import time
 
 import cv2
-
+import numpy as np
 MAX_CHUNK_SIZE = 5000
 
 def send_udp_message():
@@ -22,9 +22,12 @@ def send_udp_message():
         road_dots_path = 'coord.json'
         cam_path_arr = ['CAM_FRONT', 'CAM_BACK']
         img_arr = {}
-
+       
 
         data_send = {}
+
+        # occ
+      
 
         with open(os.path.join('json', obj_path), 'r') as f:
             data = json.load(f)
@@ -55,7 +58,7 @@ def send_udp_message():
         idx = 0
         t0 = time.time()
         while True:
-
+            
             data_send = {} # reset data_send for new frame
 
             if idx > len(list(data.keys())) - 1:

@@ -6,6 +6,7 @@ import time
 
 import cv2
 import numpy as np
+from itertools import groupby
 
 MAX_CHUNK_SIZE = 5000
 
@@ -22,6 +23,30 @@ def send_udp_message():
         img_arr = {}
 
         data_send = {}
+
+        # occ
+        occ_path = 'data/my_surocc'
+        occ_arr = []
+
+        occ_map_shape = (16, 200, 200)
+
+        x_thres = 30
+        y_thres = 60
+        for file in sorted(os.listdir(occ_path), key=lambda x: int(x.split('.')[0])):
+            data = np.load(os.path.join(occ_path, file))
+            # data = data[(data[:, 0] % 2 == 0) & (data[:, 1] % 2 == 0) & (data[:, 1] > 50 )]
+            data = data[(data[:, 1] > occ_map_shape[1] // 2 ) & (data[:, 1] < occ_map_shape[1] - x_thres)]
+            data = data[(data[:, 0] > y_thres ) & (data[:, 0] < occ_map_shape[2] - y_thres)]
+            data_sorted = data[data[:, -1].argsort()]
+
+            # 將 y, z 互換
+            # data_sorted[:, :2] = (data_sorted[:, :2] - 100) / 10
+            # data_sorted[:, 1], data_sorted[:, 2] = data_sorted[:, 2], data_sorted[:, 1].copy()
+
+            data_sorted = np.array(data_sorted).tolist()
+            # grouped_data = {k: list(v)[:3] for k, v in groupby(data_sorted, key=lambda x: x[-1])}
+            grouped_data = {k: (np.array(list(v))[:, :3]).tolist() for k, v in groupby(data_sorted, key=lambda x: x[-1])}
+            occ_arr.append(grouped_data) 
 
         with open(os.path.join("json", obj_path), "r") as f:
             data = json.load(f)
@@ -129,6 +154,9 @@ def send_udp_message():
             data_send["dot"] = data_dot
             data_send["traj"] = traj
 
+            # send occ
+            data_send["occ"] = occ_arr[idx]
+
             data_send = json.dumps(data_send).encode("utf-8")
 
             data_send += ("\0").encode("utf-8")
@@ -137,7 +165,7 @@ def send_udp_message():
                 # print('segment length : ',len(data_send[i:i+MAX_CHUNK_SIZE]))
                 client_socket.sendall(data_send[i : i + MAX_CHUNK_SIZE])
 
-            delay = 0.1
+            delay = 0.15
 
             time.sleep(delay)
             idx += 1

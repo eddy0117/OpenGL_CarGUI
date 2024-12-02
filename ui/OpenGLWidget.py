@@ -57,13 +57,33 @@ class OpenGLWidget(QOpenGLWidget):
         self.color_pal = plt.cm.plasma(range(256, 0, -1)) * 255
         self.color_pal = np.round(self.color_pal).astype(np.uint8).tolist()
 
-        # 載入預測 distance 模型
-        self.svg_reg = joblib.load('tools/svr_rbf_model.joblib')
+        self.occ_color_map = np.array(
+                [
+                    [  0,   0,   0, 255],       # others
+                    [255, 120,  50, 255],       # barrier              orange
+                    [255, 192, 203, 255],       # bicycle              pink
+                    [255, 255,   0, 255],       # bus                  yellow
+                    [  0, 150, 245, 255],       # car                  blue
+                    [  0, 255, 255, 255],       # construction_vehicle cyan
+                    [255, 127,   0, 255],       # motorcycle           dark orange
+                    [255,   0,   0, 255],       # pedestrian           red
+                    [255, 240, 150, 255],       # traffic_cone         light yellow
+                    [135,  60,   0, 255],       # trailer              brown
+                    [160,  32, 240, 255],       # truck                purple                
+                    [255,   0, 255, 255],       # driveable_surface    dark pink
+                    # [175,   0,  75, 255],       # other_flat           dark red
+                    [139, 137, 137, 255],
+                    [ 75,   0,  75, 255],       # sidewalk             dard purple
+                    [150, 240,  80, 255],       # terrain              light green          
+                    [230, 230, 250, 255],       # manmade              white
+                    [  0, 175,   0, 255],       # vegetation           green
+                    # [  0, 255, 127, 255],       # ego car              dark cyan
+                    # [255,  99,  71, 255],       # ego car
+                    # [  0, 191, 255, 255]        # ego car
+                ]
+            ).astype(np.uint8)
         
-        # nuscenes 某幀內參
-        self.intrinsic = np.array([[1.26641720e+03, 0.00000000e+00, 8.16267020e+02],
-                                    [0.00000000e+00, 1.26641720e+03, 4.91507066e+02],
-                                    [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
+        
 
     def initializeGL(self):
         glClearColor(0.0, 0.0, 0.0, 1)
@@ -81,6 +101,8 @@ class OpenGLWidget(QOpenGLWidget):
         )
 
         self.color_textures = DF.get_colors(self.color_pal)
+        self.occ_color_textures = DF.get_colors(self.occ_color_map)
+           
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
@@ -92,11 +114,13 @@ class OpenGLWidget(QOpenGLWidget):
 
     def paintGL(self):
         if self.cur_frame_data:
-            t0 = time.time()
+            # t0 = time.time()
+            # 為了改變每次渲染鏡頭視角(cam rise, cam down)
             glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
+            # 繪製自車
             DF.draw_model(self.obj_models["ego_car"], 180, [0, -5, 0])
             self.idx += 1
-
+            
             # 繪製道路地圖
 
             if self.map_draw_mode == "seg":
@@ -107,6 +131,11 @@ class OpenGLWidget(QOpenGLWidget):
                     DF.draw_dot(
                         self.obj_models[self.dot_dict[str(int(dot["cls"]))]], [x, -5, y]
                     )
+
+                # DF.draw_dot(
+                #         self.obj_models['g_side'], self.cur_frame_data["dot"]
+                #     )
+                # pass
 
             elif self.map_draw_mode == "vec":
                 if "traj" in self.cur_frame_data.keys():
@@ -142,7 +171,16 @@ class OpenGLWidget(QOpenGLWidget):
 
             # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
+            # 繪製 3d occupancy
+            if self.map_draw_mode == "vec":
+                for cls, vox_coords in self.cur_frame_data['occ'].items():
+                    if cls in ['4', '16']:
+                        continue
+                    DF.draw_occ_dot(self.occ_color_textures, int(cls), vox_coords)
+                    # pass
+                
 
+            
 
             # 2d 模式下將 box_h 輸入模型預測 distance
             if self.map_draw_mode == "2d":
@@ -178,8 +216,8 @@ class OpenGLWidget(QOpenGLWidget):
                 elif self.map_draw_mode == "vec":
                     # 使用 DataSender_TCP_vec.py 來傳送資料的話 x, y 要設定成 * 100 - 50
                     scale = 70
-                    x = c_x * scale - scale / 2
-                    y = c_y * scale - scale / 2
+                    x = c_x * scale #- scale / 2
+                    y = c_y * scale #- scale / 2
 
                     # is_stop只有在vec(SparseDrive)模式下才會有，有煞車燈
                     if (obj["is_stop"] == 1) and (cls == "car"):

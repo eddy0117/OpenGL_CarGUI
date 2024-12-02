@@ -1,5 +1,6 @@
 __pycache__/
 .mypy_cache/
 {CV2_PACKAGE_FOLDER}/
+archived/
 .vscode
 data

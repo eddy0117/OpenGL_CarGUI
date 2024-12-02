@@ -184,6 +184,8 @@ class Car_MainWindow(Ui_MainWindow):
             img = cv2.threshold(img, 105, 255, cv2.THRESH_BINARY)[1]
 
             self.cur_frame_data["dot"] = process_bev_data(img)
+            # self.cur_frame_data["dot"] = self.dummy_dot
+            
 
         # print('==== bev img time ==== : ', round((time.time() - t0) * 1000, 4), 'ms')
 
@@ -206,28 +208,24 @@ class Car_MainWindow(Ui_MainWindow):
                 if dot["cls"] == 1:
                     if dot["y"] > front_y_gap[0] and dot["y"] < front_y_gap[1]:
                         in_dot_sum += 1
+
                     if dot["y"] > back_y_gap[0] and dot["y"] < back_y_gap[1]:
                         out_dot_sum += 1
 
         elif self.draw_mode == "vec":
-            front_y_gap = [395 / 682, 415 / 682]  # front
-            back_y_gap = [225 / 682, 305 / 682]  # back
+            front_y_gap = [(395 - 341) / 682, (415 - 341) / 682]  # front
+            back_y_gap = [(225 - 341) / 682, (305 - 341) / 682]  # back
             for lines in dots_data:
                 if lines["cls"] == 1:
                     for single_dot_x, single_dot_y in zip(lines["x"], lines["y"]):
                         # TODO : 設定x軸(橫向)範圍
 
-                        if (
-                            single_dot_y > front_y_gap[0]
-                            and single_dot_y < front_y_gap[1]
-                        ):
+                        if single_dot_y > front_y_gap[0] and single_dot_y < front_y_gap[1]:
                             in_dot_sum += 1
-                        if (
-                            single_dot_y > back_y_gap[0]
-                            and single_dot_y < back_y_gap[1]
-                        ):
+                        if single_dot_y > back_y_gap[0] and single_dot_y < back_y_gap[1]:
                             out_dot_sum += 1
-
+                         
+                    
         if self.flag_frame_changed:
             # 為避免鏡頭重複上升下降, 進入路口時, 若前後偵測區域都大於閾值, 只視為進入入口
 
@@ -316,6 +314,11 @@ class Car_MainWindow(Ui_MainWindow):
         self.img_steer_right.hide()
         self.l_km.hide()
 
+        # for i in range(100):
+        #         for j in range(100):
+        #             self.cur_frame_data["dot"].append({"x": i / 30, "y": j / 30, "cls": 0})
+        # self.dummy_dot = [{"x": i / 100, "y": j / 100, "cls": 0} for i in range(100) for j in range(100)]
+        # self.dummy_dot = [(i, -5, j) for i in range(-5, 5, 1) for j in range(-5, 5, 1)]
         
     def setupTimer(self):
         self.timer_frame = QTimer()
@@ -349,10 +352,11 @@ class Car_MainWindow(Ui_MainWindow):
 
             self.update_img(self.cur_frame_data)
 
-            if self.draw_mode in ['seg', 'vec']:
-                self.isIntersection()
+            # if self.draw_mode in ['seg', 'vec']:
+            #     self.isIntersection()
 
             if self.queue_inter:
+              
                 if self.queue_inter[0] == "in":
                     self.cam_rise()
 

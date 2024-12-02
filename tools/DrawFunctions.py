@@ -6,7 +6,7 @@ from OpenGL.GL.shaders import compileProgram, compileShader
 
 from tools.ObjLoader import ObjLoader
 from tools.TextureLoader import load_texture, load_texture_by_color
-
+import numpy as np
 
 class DrawFunctions:
     model_path_prefix = "src/models/"
@@ -25,6 +25,7 @@ class DrawFunctions:
         {
             gl_Position = projection * view * model * vec4(a_position, 1.0);
             v_texture = a_texture;
+            gl_PointSize = 10.0;
         }
         """
 
@@ -32,13 +33,15 @@ class DrawFunctions:
         # version 330
         in vec2 v_texture;
         out vec4 out_color;
+        out vec4 fragColor;
         uniform sampler2D s_texture;
         void main()
         {
             out_color = texture(s_texture, v_texture);
+            fragColor = vec4(0.5, 0.5, 0.5, 0.5);  // 白色
         }
         """
-
+    
     @classmethod
     def get_model_info(cls, model_dict, view=None, projection=None):
         result = {}
@@ -49,6 +52,9 @@ class DrawFunctions:
             compileShader(cls.vertex_src, GL_VERTEX_SHADER),
             compileShader(cls.fragment_src, GL_FRAGMENT_SHADER),
         )
+
+        cls.shader = shader
+
         VAO = glGenVertexArrays(buf_arr_len)
         VBO = glGenBuffers(buf_arr_len)
 
@@ -102,6 +108,8 @@ class DrawFunctions:
                 "textures": texture_buf[idx],
             }
 
+            cls.dot_vao, cls.dot_vbo = cls.init_occdot_vbo_vao()
+
         return result, proj_loc, view_loc
 
     @staticmethod
@@ -124,6 +132,27 @@ class DrawFunctions:
 
         glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
 
+    @classmethod
+    def init_occdot_vbo_vao(cls):
+        
+        vbo = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo)
+        # glBufferData(GL_ARRAY_BUFFER, points_array.nbytes, points_array, GL_DYNAMIC_DRAW)
+        
+        vao = glGenVertexArrays(1)
+        glBindVertexArray(vao)
+        glBindBuffer(GL_ARRAY_BUFFER, vbo)
+        
+        # 位置屬性
+        glEnableVertexAttribArray(0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
+        # 顏色屬性
+        glEnableVertexAttribArray(1)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
+        
+        return vao, vbo
+
+
     @staticmethod
     def draw_dot(model_info, model_pos):
         glBindVertexArray(model_info["VAO"])
@@ -135,6 +164,60 @@ class DrawFunctions:
 
         glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
 
+    # @staticmethod
+    # def draw_dot(model_info, positions):
+      
+    #     glBindVertexArray(model_info["VAO"])
+    #     glBindTexture(GL_TEXTURE_2D, model_info["textures"])
+        
+    #     for position in positions:
+    #         pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(position))
+    #         glUniformMatrix4fv(model_info["model_loc"], 1, GL_FALSE, pos)
+    #         glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
+
+    
+    @classmethod
+    def draw_occ_dot(cls, colors, c, positions):
+        """
+        批量繪製點的優化版本
+        
+        Args:
+            model_info: 模型信息字典
+            positions: numpy數組形狀為 (N, 3) 的點位置數組
+        """
+
+
+        points_array = np.array(positions, dtype=np.float32)
+        # glUseProgram(cls.shader)
+        # 位置屬性
+
+        points_array[:, :2] = (points_array[:, :2] - 100) / 1.2
+        points_array[:, 1] = -points_array[:, 1]
+        points_array[:, 2] = points_array[:, 2] - 15
+        points_array[:, 2], points_array[:, 1] = points_array[:, 1], points_array[:, 2].copy()
+
+        glBindVertexArray(cls.dot_vao)
+        # glBindVertexArray(model_info["VAO"])
+        # glBindTexture(GL_TEXTURE_2D, model_info["textures"])
+        glBindTexture(GL_TEXTURE_2D, colors[c])
+
+        model_loc = glGetUniformLocation(cls.shader, "model")
+        rotation = pyrr.Matrix44.from_y_rotation(-cls.deg2rad(0))
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, rotation)
+
+        glPointSize(8)
+            
+        # 绑定缓冲区并更新数据
+        glBindBuffer(GL_ARRAY_BUFFER, cls.dot_vbo)
+        glBufferData(GL_ARRAY_BUFFER, points_array.nbytes, points_array, GL_DYNAMIC_DRAW)
+
+        
+        # BUG: 在 z 軸太遠的地方繪製的畫會出現在 (0, 0, 0)位置
+        glDrawArrays(GL_POINTS, 0, len(points_array))
+        # glDrawArraysInstanced(GL_TRIANGLES, 0, len(model_info["indices"]), len(points_array))
+        glBindVertexArray(0)
+        
+        
     @staticmethod
     def draw_line(model_info, x_list, z_list, y_list):
         glBindTexture(GL_TEXTURE_2D, model_info["textures"])
