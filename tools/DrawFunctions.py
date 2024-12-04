@@ -12,36 +12,63 @@ class DrawFunctions:
     model_path_prefix = "src/models/"
     texture_path_prefix = "src/textures/"
     offset = 0.3
-    vertex_src = """
-        # version 330
-        layout(location = 0) in vec3 a_position;
-        layout(location = 1) in vec2 a_texture;
-        layout(location = 2) in vec3 a_normal;
-        uniform mat4 model;
-        uniform mat4 projection;
-        uniform mat4 view;
-        out vec2 v_texture;
-        void main()
-        {
-            gl_Position = projection * view * model * vec4(a_position, 1.0);
-            v_texture = a_texture;
-            gl_PointSize = 10.0;
-        }
-        """
+    # vertex_src = """
+    #     # version 330
+    #     layout(location = 0) in vec3 a_position;
+    #     layout(location = 1) in vec2 a_texture;
+    #     layout(location = 2) in vec3 a_normal;
+        
+    #     uniform mat4 model;
+    #     uniform mat4 projection;
+    #     uniform mat4 view;
+    #     out vec2 v_texture;
+    #     void main()
+    #     {
+    #         gl_Position = projection * view * model * vec4(a_position, 1.0);
+    #         v_texture = a_texture;
+    #         gl_PointSize = 10.0;
+    #     }
+    #     """
+
+    vertex_src =\
+    """
+    # version 330
+
+    layout(location = 0) in vec3 a_position;
+    layout(location = 1) in vec2 a_texture;
+    layout(location = 2) in vec3 a_normal;
+
+    layout(location = 3) in mat4 instance_matrix;  // 實例的變換矩陣
+
+    uniform mat4 model;
+    uniform mat4 projection;
+    uniform mat4 view;
+
+    out vec2 v_texture;
+
+    void main() {
+        gl_Position = projection * view * model * vec4(a_position, 1.0);
+        v_texture = a_texture;
+        gl_PointSize = 10.0;
+    }
+
+    """
 
     fragment_src = """
         # version 330
         in vec2 v_texture;
         out vec4 out_color;
-        out vec4 fragColor;
         uniform sampler2D s_texture;
         void main()
         {
             out_color = texture(s_texture, v_texture);
-            fragColor = vec4(0.5, 0.5, 0.5, 0.5);  // 白色
         }
         """
+
     
+
+    
+
     @classmethod
     def get_model_info(cls, model_dict, view=None, projection=None):
         result = {}
@@ -146,7 +173,7 @@ class DrawFunctions:
         # 位置屬性
         glEnableVertexAttribArray(0)
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(0))
-        # 顏色屬性
+     
         glEnableVertexAttribArray(1)
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
         
@@ -175,22 +202,54 @@ class DrawFunctions:
     #         glUniformMatrix4fv(model_info["model_loc"], 1, GL_FALSE, pos)
     #         glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
 
+    @classmethod
+    def draw_occ_model(cls, model_info, positions):
+        instance_matrices = []
+        for pos in positions:
+            rot_y = pyrr.Matrix44.from_y_rotation(-cls.deg2rad(0))
+            translation = pyrr.matrix44.create_from_translation(pyrr.Vector3(pos))
+            transform = pyrr.matrix44.multiply(rot_y, translation)
+            instance_matrices.append(transform)
+        instance_matrices = np.array(instance_matrices, dtype=np.float32)
+
+        # 創建實例矩陣緩衝區
+        instance_vbo = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, instance_vbo)
+        glBufferData(GL_ARRAY_BUFFER, instance_matrices.nbytes, instance_matrices, GL_STATIC_DRAW)
+
+        # 綁定緩衝區到 VAO
+        glBindVertexArray(model_info["VAO"])
+
+        # 每個實例的變換矩陣由 4 個 vec4 表示
+        for i in range(4):  # Matrix4x4 被分為 4 個 vec4
+            glEnableVertexAttribArray(3 + i)  # 頂點屬性位置從 3 開始
+            glVertexAttribPointer(
+                3 + i, 4, GL_FLOAT, GL_FALSE, 64, ctypes.c_void_p(i * 16)
+            )  # 每行偏移 16 字節（4 個 float）
+            glVertexAttribDivisor(3 + i, 1)  # 每個實例使用一次此屬性
+
+        glBindVertexArray(model_info["VAO"])
+        glBindTexture(GL_TEXTURE_2D, model_info["textures"])
+
+        # 繪製 num_instances 個實例
+        glDrawArraysInstanced(GL_TRIANGLES, 0, len(model_info["indices"]), len(positions))
     
     @classmethod
     def draw_occ_dot(cls, colors, c, positions):
 
         points_array = np.array(positions, dtype=np.float32)
         # glUseProgram(cls.shader)
-        # 位置屬性
-
+        
+        # 對座標進行縮放和平移
+        # 橫向
         points_array[:, :2] = (points_array[:, :2] - 100) / 1.2
+        # 直向
         points_array[:, 1] = -points_array[:, 1]
-        points_array[:, 2] = points_array[:, 2] - 15
+        # 高度
+        points_array[:, 2] = (points_array[:, 2] / 1.5) - 11
         points_array[:, 2], points_array[:, 1] = points_array[:, 1], points_array[:, 2].copy()
 
         glBindVertexArray(cls.dot_vao)
-        # glBindVertexArray(model_info["VAO"])
-        # glBindTexture(GL_TEXTURE_2D, model_info["textures"])
         glBindTexture(GL_TEXTURE_2D, colors[c])
 
         model_loc = glGetUniformLocation(cls.shader, "model")
@@ -199,11 +258,9 @@ class DrawFunctions:
 
         glPointSize(8)
             
-        # 绑定缓冲区并更新数据
         glBindBuffer(GL_ARRAY_BUFFER, cls.dot_vbo)
         glBufferData(GL_ARRAY_BUFFER, points_array.nbytes, points_array, GL_DYNAMIC_DRAW)
-
-        
+    
         # BUG: 在 z 軸太遠的地方繪製的畫會出現在 (0, 0, 0)位置
         glDrawArrays(GL_POINTS, 0, len(points_array))
         # glDrawArraysInstanced(GL_TRIANGLES, 0, len(model_info["indices"]), len(points_array))

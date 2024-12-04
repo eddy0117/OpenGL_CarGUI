@@ -8,8 +8,7 @@ from OpenGL.GLU import *
 from PyQt5.QtWidgets import QOpenGLWidget
 from tools.utils import twoD_2_threeD, rotate_2d_point
 from tools.DrawFunctions import DrawFunctions as DF
-import joblib
-# 從檔案載入模型
+
 
 
 
@@ -70,16 +69,13 @@ class OpenGLWidget(QOpenGLWidget):
                     [255, 240, 150, 255],       # traffic_cone         light yellow
                     [135,  60,   0, 255],       # trailer              brown
                     [160,  32, 240, 255],       # truck                purple                
-                    [255,   0, 255, 255],       # driveable_surface    dark pink
-                    # [175,   0,  75, 255],       # other_flat           dark red
+                    [50,   50, 50, 255],       # driveable_surface    dark pink
                     [139, 137, 137, 255],
                     [ 75,   0,  75, 255],       # sidewalk             dard purple
                     [150, 240,  80, 255],       # terrain              light green          
                     [230, 230, 250, 255],       # manmade              white
                     [  0, 175,   0, 255],       # vegetation           green
-                    # [  0, 255, 127, 255],       # ego car              dark cyan
-                    # [255,  99,  71, 255],       # ego car
-                    # [  0, 191, 255, 255]        # ego car
+            
                 ]
             ).astype(np.uint8)
         
@@ -177,7 +173,9 @@ class OpenGLWidget(QOpenGLWidget):
                     if cls in ['4', '16']:
                         continue
                     DF.draw_occ_dot(self.occ_color_textures, int(cls), vox_coords)
-                    # pass
+                    # DF.draw_occ_model(self.obj_models['g_crosswalk'], vox_coords)
+
+                    pass
                 
 
             
