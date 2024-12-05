@@ -47,9 +47,8 @@ class DrawFunctions:
     out vec2 v_texture;
 
     void main() {
-        gl_Position = projection * view * model * vec4(a_position, 1.0);
+        gl_Position = projection * view * instance_matrix * vec4(a_position, 1.0);
         v_texture = a_texture;
-        gl_PointSize = 10.0;
     }
 
     """
@@ -205,6 +204,13 @@ class DrawFunctions:
     @classmethod
     def draw_occ_model(cls, model_info, positions):
         instance_matrices = []
+        positions = np.array(positions, dtype=np.float32)
+        positions[:, :2] = (positions[:, :2] - 100) / 1.2
+        # 直向
+        positions[:, 1] = -positions[:, 1]
+        # 高度
+        positions[:, 2] = (positions[:, 2] / 1.5) - 11
+        positions[:, 2], positions[:, 1] = positions[:, 1], positions[:, 2].copy()
         for pos in positions:
             rot_y = pyrr.Matrix44.from_y_rotation(-cls.deg2rad(0))
             translation = pyrr.matrix44.create_from_translation(pyrr.Vector3(pos))

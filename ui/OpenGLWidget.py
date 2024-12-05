@@ -114,7 +114,7 @@ class OpenGLWidget(QOpenGLWidget):
             # 為了改變每次渲染鏡頭視角(cam rise, cam down)
             glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
             # 繪製自車
-            DF.draw_model(self.obj_models["ego_car"], 180, [0, -5, 0])
+            # DF.draw_model(self.obj_models["ego_car"], 180, [0, -5, 0])
             self.idx += 1
             
             # 繪製道路地圖
@@ -145,7 +145,7 @@ class OpenGLWidget(QOpenGLWidget):
                     y = y.tolist()
 
                     z = [0 for _ in range(len(x))]
-                    DF.draw_traj_pred(self.color_textures, x, z, y)
+                    # DF.draw_traj_pred(self.color_textures, x, z, y)
 
                 glLineWidth(5)
 
@@ -153,9 +153,9 @@ class OpenGLWidget(QOpenGLWidget):
                     x = [dot_x * 70 - 35 for dot_x in lines["x"]]
                     y = [dot_y * 70 - 35 for dot_y in lines["y"]]
                     z = [0 for _ in range(len(x))]
-                    DF.draw_line(
-                        self.obj_models[self.dot_dict[str(lines["cls"])]], x, z, y
-                    )
+                    # DF.draw_line(
+                    #     self.obj_models[self.dot_dict[str(lines["cls"])]], x, z, y
+                    # )
 
                 # # DEBUG 畫前後偵測區域
                 # line_1 = [int(l1 / 682 * 70 - 35) for l1 in [395, 415]] # front
@@ -172,8 +172,8 @@ class OpenGLWidget(QOpenGLWidget):
                 for cls, vox_coords in self.cur_frame_data['occ'].items():
                     if cls in ['4', '16']:
                         continue
-                    DF.draw_occ_dot(self.occ_color_textures, int(cls), vox_coords)
-                    # DF.draw_occ_model(self.obj_models['g_crosswalk'], vox_coords)
+                    # DF.draw_occ_dot(self.occ_color_textures, int(cls), vox_coords)
+                    DF.draw_occ_model(self.obj_models['g_crosswalk'], vox_coords)
 
                     pass
                 
@@ -252,7 +252,7 @@ class OpenGLWidget(QOpenGLWidget):
                 if not x or not y:
                     continue
 
-                DF.draw_model(self.obj_models[cls], ang, [x, -5, y])
+                # DF.draw_model(self.obj_models[cls], ang, [x, -5, y])
 
             # t1 = time.time()
             # if t1 - t0 > self.peek:
