@@ -39,6 +39,7 @@ class OpenGLWidget(QOpenGLWidget):
             "g_crosswalk": ["cube.obj", "crossroad.png"],
             "g_roadline": ["cube.obj", "roadline.png"],
             "g_side": ["cube.obj", "side.png"],
+            "occ_dot": ["cube4m.obj", "side.png"],
             "sign_60": ["sign_60.obj", "sign_60.png"],
             "sign_ped": ["sign_ped.obj", "sign_ped.png"],
             "front_arrow": ["front_arrow.obj", "white.png"],
@@ -110,11 +111,12 @@ class OpenGLWidget(QOpenGLWidget):
 
     def paintGL(self):
         if self.cur_frame_data:
-            # t0 = time.time()
+        
+            t0 = time.time()
             # 為了改變每次渲染鏡頭視角(cam rise, cam down)
             glUniformMatrix4fv(self.view_loc, 1, GL_FALSE, self.view)
             # 繪製自車
-            # DF.draw_model(self.obj_models["ego_car"], 180, [0, -5, 0])
+            DF.draw_model(self.obj_models["ego_car"], 180, [0, -5, 0])
             self.idx += 1
             
             # 繪製道路地圖
@@ -134,6 +136,7 @@ class OpenGLWidget(QOpenGLWidget):
                 # pass
 
             elif self.map_draw_mode == "vec":
+             
                 if "traj" in self.cur_frame_data.keys():
                     glLineWidth(50)
 
@@ -150,13 +153,17 @@ class OpenGLWidget(QOpenGLWidget):
                 glLineWidth(5)
 
                 for lines in self.cur_frame_data["dot"]:
-                    x = [dot_x * 70 - 35 for dot_x in lines["x"]]
-                    y = [dot_y * 70 - 35 for dot_y in lines["y"]]
-                    z = [0 for _ in range(len(x))]
+                    # x = [dot_x * 70 - 35 for dot_x in lines["x"]]
+                    # y = [dot_y * 70 - 35 for dot_y in lines["y"]]
+                    # z = [0 for _ in range(len(x))]
                     # DF.draw_line(
                     #     self.obj_models[self.dot_dict[str(lines["cls"])]], x, z, y
                     # )
-
+                    scale = 25
+                    lines_pos = np.array([lines["x"], np.zeros(len(lines["x"])), lines["y"]]).T
+                    lines_pos[:, 0] = -(lines_pos[:, 0] * scale - (scale / 2))
+                    lines_pos[:, 2] = -(lines_pos[:, 2] * scale - (scale / 2)) + 10
+                    DF.draw_occ_model(self.obj_models[self.dot_dict[str(lines["cls"])]], lines_pos, self.obj_models[self.dot_dict[str(lines["cls"])]]["texture"])
                 # # DEBUG 畫前後偵測區域
                 # line_1 = [int(l1 / 682 * 70 - 35) for l1 in [395, 415]] # front
                 # line_2 = [int(l1 / 682 * 70 - 35) for l1 in [265, 305]] # back
@@ -170,10 +177,19 @@ class OpenGLWidget(QOpenGLWidget):
             # 繪製 3d occupancy
             if self.map_draw_mode == "vec":
                 for cls, vox_coords in self.cur_frame_data['occ'].items():
-                    if cls in ['4', '16']:
+                    # bicycle, car, motocycle, pedestrian, truck, terrain 不畫 voxel
+                    if cls in ['2', '4', '6', '7', '10', '16']:
                         continue
+
+                    vox_coords = np.array(vox_coords, dtype=np.float32)
+                    vox_coords[:, :2] = (vox_coords[:, :2] - 100) / 1.2
+                    # 直向
+                    vox_coords[:, 1] = -vox_coords[:, 1]
+                    # 高度
+                    vox_coords[:, 2] = (vox_coords[:, 2] / 1.5) - 11
+                    vox_coords[:, 2], vox_coords[:, 1] = vox_coords[:, 1], vox_coords[:, 2].copy()
                     # DF.draw_occ_dot(self.occ_color_textures, int(cls), vox_coords)
-                    DF.draw_occ_model(self.obj_models['g_crosswalk'], vox_coords)
+                    DF.draw_occ_model(self.obj_models['occ_dot'], vox_coords, self.occ_color_textures[int(cls)])
 
                     pass
                 
@@ -252,9 +268,9 @@ class OpenGLWidget(QOpenGLWidget):
                 if not x or not y:
                     continue
 
-                # DF.draw_model(self.obj_models[cls], ang, [x, -5, y])
+                DF.draw_model(self.obj_models[cls], ang, [x, -5, y])
 
-            # t1 = time.time()
-            # if t1 - t0 > self.peek:
-            #     self.peek = t1 - t0
-            # print('peek : ', round(self.peek * 1000, 4), 'ms')
+            t1 = time.time()
+            if t1 - t0 > self.peek:
+                self.peek = t1 - t0
+            print('peek : ', round(self.peek * 1000, 4), 'ms')

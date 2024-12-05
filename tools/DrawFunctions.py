@@ -12,23 +12,32 @@ class DrawFunctions:
     model_path_prefix = "src/models/"
     texture_path_prefix = "src/textures/"
     offset = 0.3
-    # vertex_src = """
-    #     # version 330
-    #     layout(location = 0) in vec3 a_position;
-    #     layout(location = 1) in vec2 a_texture;
-    #     layout(location = 2) in vec3 a_normal;
+    vertex_src_line = """
+        # version 330
+        layout(location = 0) in vec3 a_position;
+        layout(location = 1) in vec2 a_texture;
+        layout(location = 2) in vec3 a_normal;
         
-    #     uniform mat4 model;
-    #     uniform mat4 projection;
-    #     uniform mat4 view;
-    #     out vec2 v_texture;
-    #     void main()
-    #     {
-    #         gl_Position = projection * view * model * vec4(a_position, 1.0);
-    #         v_texture = a_texture;
-    #         gl_PointSize = 10.0;
-    #     }
-    #     """
+        uniform mat4 model;
+        uniform mat4 projection;
+        uniform mat4 view;
+        out vec2 v_texture;
+        void main()
+        {
+            gl_Position = projection * view * model * vec4(a_position, 1.0);
+            v_texture = a_texture;
+        }
+        """
+    fragment_src_line = """
+        # version 330
+        in vec2 v_texture;
+        out vec4 out_color;
+        uniform sampler2D s_texture;
+        void main()
+        {
+            out_color = texture(s_texture, v_texture);
+        }
+        """
 
     vertex_src =\
     """
@@ -78,9 +87,13 @@ class DrawFunctions:
             compileShader(cls.vertex_src, GL_VERTEX_SHADER),
             compileShader(cls.fragment_src, GL_FRAGMENT_SHADER),
         )
+        line_shader = compileProgram(
+            compileShader(cls.vertex_src_line, GL_VERTEX_SHADER),
+            compileShader(cls.fragment_src_line, GL_FRAGMENT_SHADER),
+        )
 
         cls.shader = shader
-
+        cls.line_shader = line_shader
         VAO = glGenVertexArrays(buf_arr_len)
         VBO = glGenBuffers(buf_arr_len)
 
@@ -127,15 +140,29 @@ class DrawFunctions:
 
             glUniformMatrix4fv(proj_loc, 1, GL_FALSE, projection)
             glUniformMatrix4fv(view_loc, 1, GL_FALSE, view)
+
             result[model_name] = {
                 "model_loc": model_loc,
                 "indices": model_indices,
                 "VAO": VAO[idx],
-                "textures": texture_buf[idx],
+                "texture": texture_buf[idx],
             }
 
-            cls.dot_vao, cls.dot_vbo = cls.init_occdot_vbo_vao()
+        cls.dot_vao, cls.dot_vbo = cls.init_occdot_vbo_vao()
 
+        glUseProgram(line_shader)
+
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    
+        line_proj_loc = glGetUniformLocation(line_shader, "projection")
+        line_view_loc = glGetUniformLocation(line_shader, "view")
+        glUniformMatrix4fv(line_proj_loc, 1, GL_FALSE, projection)
+        glUniformMatrix4fv(line_view_loc, 1, GL_FALSE, view)
+        
+        glUseProgram(shader)
         return result, proj_loc, view_loc
 
     @staticmethod
@@ -151,12 +178,42 @@ class DrawFunctions:
         pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
 
         glBindVertexArray(model_info["VAO"])
-        glBindTexture(GL_TEXTURE_2D, model_info["textures"])
+        glBindTexture(GL_TEXTURE_2D, model_info["texture"])
 
         model_transform = pyrr.matrix44.multiply(rot_y, pos)
         glUniformMatrix4fv(model_info["model_loc"], 1, GL_FALSE, model_transform)
 
         glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
+
+    @classmethod
+    def draw_model(cls, model_info, deg, model_pos):
+
+      
+        rot_y = pyrr.Matrix44.from_y_rotation(-cls.deg2rad(deg))
+        translation = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
+        transform = pyrr.matrix44.multiply(rot_y, translation)
+        instance_matrices = np.array(transform, np.float32)
+        # 創建實例矩陣緩衝區
+        instance_vbo = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, instance_vbo)
+        glBufferData(GL_ARRAY_BUFFER, instance_matrices.nbytes, instance_matrices, GL_STATIC_DRAW)
+
+        # 綁定緩衝區到 VAO
+        glBindVertexArray(model_info["VAO"])
+
+        # 每個實例的變換矩陣由 4 個 vec4 表示
+        for i in range(4):  # Matrix4x4 被分為 4 個 vec4
+            glEnableVertexAttribArray(3 + i)  # 頂點屬性位置從 3 開始
+            glVertexAttribPointer(
+                3 + i, 4, GL_FLOAT, GL_FALSE, 64, ctypes.c_void_p(i * 16)
+            )  # 每行偏移 16 字節（4 個 float）
+            glVertexAttribDivisor(3 + i, 1)  # 每個實例使用一次此屬性
+
+        glBindVertexArray(model_info["VAO"])
+        glBindTexture(GL_TEXTURE_2D, model_info["texture"])
+
+        # 繪製 num_instances 個實例
+        glDrawArraysInstanced(GL_TRIANGLES, 0, len(model_info["indices"]), 1)
 
     @classmethod
     def init_occdot_vbo_vao(cls):
@@ -185,38 +242,20 @@ class DrawFunctions:
 
         pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
 
-        glBindTexture(GL_TEXTURE_2D, model_info["textures"])
+        glBindTexture(GL_TEXTURE_2D, model_info["texture"])
         glUniformMatrix4fv(model_info["model_loc"], 1, GL_FALSE, pos)
 
         glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
 
-    # @staticmethod
-    # def draw_dot(model_info, positions):
-      
-    #     glBindVertexArray(model_info["VAO"])
-    #     glBindTexture(GL_TEXTURE_2D, model_info["textures"])
-        
-    #     for position in positions:
-    #         pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(position))
-    #         glUniformMatrix4fv(model_info["model_loc"], 1, GL_FALSE, pos)
-    #         glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
-
     @classmethod
-    def draw_occ_model(cls, model_info, positions):
-        instance_matrices = []
-        positions = np.array(positions, dtype=np.float32)
-        positions[:, :2] = (positions[:, :2] - 100) / 1.2
-        # 直向
-        positions[:, 1] = -positions[:, 1]
-        # 高度
-        positions[:, 2] = (positions[:, 2] / 1.5) - 11
-        positions[:, 2], positions[:, 1] = positions[:, 1], positions[:, 2].copy()
-        for pos in positions:
-            rot_y = pyrr.Matrix44.from_y_rotation(-cls.deg2rad(0))
-            translation = pyrr.matrix44.create_from_translation(pyrr.Vector3(pos))
-            transform = pyrr.matrix44.multiply(rot_y, translation)
-            instance_matrices.append(transform)
-        instance_matrices = np.array(instance_matrices, dtype=np.float32)
+    def draw_occ_model(cls, model_info, positions, color):
+   
+        
+
+        instance_matrices = np.tile(np.eye(4, dtype=np.float32), (len(positions), 1, 1))
+
+        # # 將平移數據填入每個矩陣的第 4 列
+        instance_matrices[:, 3, :3] = positions
 
         # 創建實例矩陣緩衝區
         instance_vbo = glGenBuffers(1)
@@ -235,7 +274,7 @@ class DrawFunctions:
             glVertexAttribDivisor(3 + i, 1)  # 每個實例使用一次此屬性
 
         glBindVertexArray(model_info["VAO"])
-        glBindTexture(GL_TEXTURE_2D, model_info["textures"])
+        glBindTexture(GL_TEXTURE_2D, color)
 
         # 繪製 num_instances 個實例
         glDrawArraysInstanced(GL_TRIANGLES, 0, len(model_info["indices"]), len(positions))
@@ -275,7 +314,7 @@ class DrawFunctions:
         
     @staticmethod
     def draw_line(model_info, x_list, z_list, y_list):
-        glBindTexture(GL_TEXTURE_2D, model_info["textures"])
+        glBindTexture(GL_TEXTURE_2D, model_info["texture"])
         # glColor3f(1, 1, 1)
         glBegin(GL_LINES)
 
@@ -287,6 +326,7 @@ class DrawFunctions:
                 glVertex3f(x, z, y)
                 last_pts = (x, z, y)
         glEnd()
+        
 
     @classmethod
     def draw_traj_pred(cls, colors, x_list, z_list, y_list):

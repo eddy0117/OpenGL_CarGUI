@@ -35,7 +35,7 @@ def send_udp_message():
         for file in sorted(os.listdir(occ_path), key=lambda x: int(x.split('.')[0])):
             data = np.load(os.path.join(occ_path, file))
             # data = data[(data[:, 0] % 2 == 0) & (data[:, 1] % 2 == 0) & (data[:, 1] > 50 )]
-            data = data[(data[:, 1] > occ_map_shape[1] // 2 ) & (data[:, 1] < occ_map_shape[1] - x_thres)]
+            data = data[(data[:, 1] > occ_map_shape[1] // 2 - 7) & (data[:, 1] < occ_map_shape[1] - x_thres)]
             data = data[(data[:, 0] > y_thres ) & (data[:, 0] < occ_map_shape[2] - y_thres)]
             data_sorted = data[data[:, -1].argsort()]
 
