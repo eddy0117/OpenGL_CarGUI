@@ -168,7 +168,7 @@ class OpenGLWidget(QOpenGLWidget):
             # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
             # 繪製 3d occupancy
-            if self.map_draw_mode == "vec":
+            if self.map_draw_mode == "vec+occ":
                 for cls, vox_coords in self.cur_frame_data['occ'].items():
                     if cls in ['4', '16']:
                         continue

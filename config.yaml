@@ -1,9 +1,10 @@
 # draw mode 
 # seg: 3d bbox + BEV segmentationMap, 
 # vec: 3d bbox + VectorMap, 
+# vec+occ
 # 2d: 2d bbox, 
 # 3d: 3d bbox
-draw_mode: "vec"
+draw_mode: "vec+occ"
 
 # ip configuration
 ip: "localhost"
