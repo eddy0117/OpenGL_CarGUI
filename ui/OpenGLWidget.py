@@ -163,6 +163,7 @@ class OpenGLWidget(QOpenGLWidget):
                     lines_pos = np.array([lines["x"], np.zeros(len(lines["x"])), lines["y"]]).T
                     lines_pos[:, 0] = -(lines_pos[:, 0] * scale - (scale / 2))
                     lines_pos[:, 2] = -(lines_pos[:, 2] * scale - (scale / 2)) + 10
+                    lines_pos[:, 1] -= 0.5
                     DF.draw_occ_model(self.obj_models[self.dot_dict[str(lines["cls"])]], lines_pos, self.obj_models[self.dot_dict[str(lines["cls"])]]["texture"])
                 # # DEBUG 畫前後偵測區域
                 # line_1 = [int(l1 / 682 * 70 - 35) for l1 in [395, 415]] # front
@@ -182,9 +183,9 @@ class OpenGLWidget(QOpenGLWidget):
                         continue
 
                     vox_coords = np.array(vox_coords, dtype=np.float32)
-                    vox_coords[:, :2] = (vox_coords[:, :2] - 100) / 1.2
+                    vox_coords[:, :2] = (vox_coords[:, :2] - 100) / 1.5
                     # 直向
-                    vox_coords[:, 1] = -vox_coords[:, 1]
+                    vox_coords[:, 1] = -vox_coords[:, 1] * 1
                     # 高度
                     vox_coords[:, 2] = (vox_coords[:, 2] / 1.5) - 11
                     vox_coords[:, 2], vox_coords[:, 1] = vox_coords[:, 1], vox_coords[:, 2].copy()
