@@ -12,37 +12,12 @@ class DrawFunctions:
     model_path_prefix = "src/models/"
     texture_path_prefix = "src/textures/"
     offset = 0.3
-    vertex_src_line = """
-        # version 330
-        layout(location = 0) in vec3 a_position;
-        layout(location = 1) in vec2 a_texture;
-        layout(location = 2) in vec3 a_normal;
-        
-        uniform mat4 model;
-        uniform mat4 projection;
-        uniform mat4 view;
-        out vec2 v_texture;
-        void main()
-        {
-            gl_Position = projection * view * model * vec4(a_position, 1.0);
-            v_texture = a_texture;
-        }
-        """
-    fragment_src_line = """
-        # version 330
-        in vec2 v_texture;
-        out vec4 out_color;
-        uniform sampler2D s_texture;
-        void main()
-        {
-            out_color = texture(s_texture, v_texture);
-        }
-        """
+
 
     vertex_src =\
     """
-    # version 330
-
+    # version 300 es
+    precision lowp float;
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in vec2 a_texture;
     layout(location = 2) in vec3 a_normal;
@@ -63,7 +38,8 @@ class DrawFunctions:
     """
 
     fragment_src = """
-        # version 330
+        # version 300 es
+        precision lowp float;
         in vec2 v_texture;
         out vec4 out_color;
         uniform sampler2D s_texture;
@@ -87,13 +63,9 @@ class DrawFunctions:
             compileShader(cls.vertex_src, GL_VERTEX_SHADER),
             compileShader(cls.fragment_src, GL_FRAGMENT_SHADER),
         )
-        line_shader = compileProgram(
-            compileShader(cls.vertex_src_line, GL_VERTEX_SHADER),
-            compileShader(cls.fragment_src_line, GL_FRAGMENT_SHADER),
-        )
-
+      
         cls.shader = shader
-        cls.line_shader = line_shader
+
         VAO = glGenVertexArrays(buf_arr_len)
         VBO = glGenBuffers(buf_arr_len)
 
@@ -150,19 +122,14 @@ class DrawFunctions:
 
         cls.dot_vao, cls.dot_vbo = cls.init_occdot_vbo_vao()
 
-        glUseProgram(line_shader)
+     
 
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
+
     
-        line_proj_loc = glGetUniformLocation(line_shader, "projection")
-        line_view_loc = glGetUniformLocation(line_shader, "view")
-        glUniformMatrix4fv(line_proj_loc, 1, GL_FALSE, projection)
-        glUniformMatrix4fv(line_view_loc, 1, GL_FALSE, view)
-        
-        glUseProgram(shader)
         return result, proj_loc, view_loc
 
     @staticmethod
