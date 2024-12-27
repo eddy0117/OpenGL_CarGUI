@@ -46,7 +46,6 @@ Ubuntu requires opencv-headless
 ```
 pip install opencv-python-headless
 ```
----
 
 ### Install Dataset-Related Packages：
 
