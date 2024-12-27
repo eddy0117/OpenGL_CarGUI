@@ -28,6 +28,16 @@ We use those models to get environment infomation:
 
 
 ## Installation
+### Create conda environment:
+
+
+```bash
+conda create -n cargui python=3.9
+conda activate cargui
+```
+
+
+Install  Packages：
 ```
 pip install -r requirements.txt
 ```
@@ -36,6 +46,19 @@ Ubuntu requires opencv-headless
 ```
 pip install opencv-python-headless
 ```
+
+### Install Dataset-Related Packages：
+
+To set up the required environment for working with datasets, install the following packages:
+
+
+
+Install nuScenes Devkit：
+```bash
+pip install nuscenes-devkit
+```
+
+
 
 ## Usage
 
@@ -113,3 +136,16 @@ for i in range(0, len(data_send), MAX_CHUNK_SIZE):
 ```
 
 you can refer sender/DataSender_TCP_3d.py for more detail
+
+##  Other reference documents
+
+1. If you want to perform a display test in occupancy mode.
+[HERE](docs/run_occ.md)
+
+2. If you want to refer to how to place datasets using symbolic links.
+[HERE](docs/Symb_link.md)
+
+
+
+
+
