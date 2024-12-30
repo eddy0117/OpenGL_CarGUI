@@ -164,19 +164,15 @@ class OpenGLWidget(QOpenGLWidget):
                     lines_pos[:, 0] = -(lines_pos[:, 0] * scale - (scale / 2))
                     lines_pos[:, 2] = -(lines_pos[:, 2] * scale - (scale / 2)) + 10
                     lines_pos[:, 1] -= 0.5
-                    DF.draw_occ_model(self.obj_models[self.dot_dict[str(lines["cls"])]], lines_pos, self.obj_models[self.dot_dict[str(lines["cls"])]]["texture"])
-                # # DEBUG 畫前後偵測區域
-                # line_1 = [int(l1 / 682 * 70 - 35) for l1 in [395, 415]] # front
-                # line_2 = [int(l1 / 682 * 70 - 35) for l1 in [265, 305]] # back
+                    # do interpolation
+                    lines_pos = DF.line_interpolation(lines_pos, 15)
 
-                # # draw_line(self.obj_models[self.dot_dict['1']], [-5, 5], [-5, -5], [10, 10])
-                # draw_line(self.obj_models[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_1[0], line_1[1], line_1[1], line_1[0], line_1[0]])
-                # draw_line(self.obj_models[self.dot_dict['1']], [-100, -100, 100, 100, -100], [0 for _ in range(5)], [line_2[0], line_2[1], line_2[1], line_2[0], line_2[0]])
+                    DF.draw_occ_model(self.obj_models[self.dot_dict[str(lines["cls"])]], lines_pos, self.obj_models[self.dot_dict[str(lines["cls"])]]["texture"])
 
             # print('draw dot time : ', round((time.time() - t0) * 1000, 4), 'ms')
 
             # 繪製 3d occupancy
-            if self.map_draw_mode == "vec":
+            if self.map_draw_mode == "vec" and "occ" in self.cur_frame_data.keys():
                 for cls, vox_coords in self.cur_frame_data['occ'].items():
                     # bicycle, car, motocycle, pedestrian, truck, terrain 不畫 voxel
                     if cls in ['2', '4', '6', '7', '10', '16']:

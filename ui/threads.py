@@ -41,9 +41,7 @@ class DataRecievedThread(QObject):
 
                 data_split = data.split(b"\0")
                 if len(data_split) > 1:  # End of a package
-                    data_cat = data_split[
-                        1
-                    ]  # Preserve the rest of the data (a part of next frame first chunk)
+                    data_cat = data_split[1]  # Preserve the rest of the data (a part of next frame first chunk)
                     whole_data += data_split[0]
                     data = json.loads(whole_data.strip(b"\0").decode("utf-8"))
                     self.data_recieved_signal.emit(data)

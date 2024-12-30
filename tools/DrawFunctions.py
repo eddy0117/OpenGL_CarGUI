@@ -16,8 +16,8 @@ class DrawFunctions:
 
     vertex_src =\
     """
-    # version 300 es
-    precision lowp float;
+   
+    #version 330
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in vec2 a_texture;
     layout(location = 2) in vec3 a_normal;
@@ -38,8 +38,7 @@ class DrawFunctions:
     """
 
     fragment_src = """
-        # version 300 es
-        precision lowp float;
+        #version 330 
         in vec2 v_texture;
         out vec4 out_color;
         uniform sampler2D s_texture;
@@ -63,9 +62,10 @@ class DrawFunctions:
             compileShader(cls.vertex_src, GL_VERTEX_SHADER),
             compileShader(cls.fragment_src, GL_FRAGMENT_SHADER),
         )
-      
-        cls.shader = shader
+        
 
+        cls.shader = shader
+ 
         VAO = glGenVertexArrays(buf_arr_len)
         VBO = glGenBuffers(buf_arr_len)
 
@@ -122,14 +122,8 @@ class DrawFunctions:
 
         cls.dot_vao, cls.dot_vbo = cls.init_occdot_vbo_vao()
 
-     
+        
 
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-
-    
         return result, proj_loc, view_loc
 
     @staticmethod
@@ -202,17 +196,23 @@ class DrawFunctions:
         
         return vao, vbo
 
+    @classmethod
+    def line_interpolation(cls, line_points, num_points):
 
-    @staticmethod
-    def draw_dot(model_info, model_pos):
-        glBindVertexArray(model_info["VAO"])
-
-        pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
-
-        glBindTexture(GL_TEXTURE_2D, model_info["texture"])
-        glUniformMatrix4fv(model_info["model_loc"], 1, GL_FALSE, pos)
-
-        glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
+        points = np.array(line_points)
+ 
+        starts = points[:-1]  
+        ends = points[1:]     
+        
+        t = np.linspace(0, 1, num_points, endpoint=False)
+        t = t[:, None, None]                    # shape: (num_points, 1, 1)
+        starts = starts[None, :, :]             # shape: (1, num_segments, 3)
+        ends = ends[None, :, :]                 # shape: (1, num_segments, 3)
+        
+        interpolated = starts + t * (ends - starts)  # shape: (num_points, num_segments, 3)
+        
+        result = interpolated.reshape(-1, 3).tolist()
+        return result
 
     @classmethod
     def draw_occ_model(cls, model_info, positions, color):
@@ -278,7 +278,19 @@ class DrawFunctions:
         # glDrawArraysInstanced(GL_TRIANGLES, 0, len(model_info["indices"]), len(points_array))
         glBindVertexArray(0)
         
-        
+
+    @staticmethod
+    def draw_dot(model_info, model_pos):
+        glBindVertexArray(model_info["VAO"])
+
+        pos = pyrr.matrix44.create_from_translation(pyrr.Vector3(model_pos))
+
+        glBindTexture(GL_TEXTURE_2D, model_info["texture"])
+        glUniformMatrix4fv(model_info["model_loc"], 1, GL_FALSE, pos)
+
+        glDrawArrays(GL_TRIANGLES, 0, len(model_info["indices"]))
+
+
     @staticmethod
     def draw_line(model_info, x_list, z_list, y_list):
         glBindTexture(GL_TEXTURE_2D, model_info["texture"])
