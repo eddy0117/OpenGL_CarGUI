@@ -399,4 +399,9 @@ if __name__ == "__main__":
     ui.setupUi(window)
     window.show()
     ui.setupTimer()
-    sys.exit(app.exec_())
+    app.exec_()
+    print("Max consumed time: ", np.max(ui.openGLWidget.consume_time_list) * 1000)
+    print("Min consumed time: ", np.min(ui.openGLWidget.consume_time_list) * 1000)
+    print("Average consumed time: ", np.mean(ui.openGLWidget.consume_time_list) * 1000)
+
+    sys.exit()

@@ -49,6 +49,7 @@ class OpenGLWidget(QOpenGLWidget):
 
         self.idx = 0
         self.peek = 0
+        self.consume_time_list = []
 
         self.map_draw_mode = "vec"
         self.cur_frame_data = {}
@@ -272,6 +273,7 @@ class OpenGLWidget(QOpenGLWidget):
                 DF.draw_model(self.obj_models[cls], ang, [x, -5, y])
 
             t1 = time.time()
-            if t1 - t0 > self.peek:
-                self.peek = t1 - t0
-            print('peek : ', round(self.peek * 1000, 4), 'ms')
+            self.consume_time_list.append(t1 - t0)
+            # if t1 - t0 > self.peek:
+            #     self.peek = t1 - t0
+            # print('peek : ', round(self.peek * 1000, 4), 'ms')

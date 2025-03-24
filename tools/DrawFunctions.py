@@ -18,7 +18,7 @@ class DrawFunctions:
     """
    
     #version 300 es
-    precision mediump float;
+    precision lowp float;
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in vec2 a_texture;
     layout(location = 2) in vec3 a_normal;
@@ -40,7 +40,7 @@ class DrawFunctions:
 
     fragment_src = """
         #version 300 es
-        precision mediump float;
+        precision lowp float;
         in vec2 v_texture;
         out vec4 out_color;
         uniform sampler2D s_texture;
